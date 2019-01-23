@@ -1,0 +1,30 @@
+{
+  "name": "online_judge",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pinnamanivenkat/VNR-Online-Judge.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/pinnamanivenkat/VNR-Online-Judge/issues"
+  },
+  "homepage": "https://github.com/pinnamanivenkat/VNR-Online-Judge#readme",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "compression": "^1.7.3",
+    "connect-flash": "^0.1.1",
+    "ejs": "^2.6.1",
+    "express": "^4.16.4",
+    "express-winston": "^3.0.1",
+    "nodemon": "^1.18.9",
+    "winston": "^3.1.0"
+  },
+  "devDependencies": {},
+  "description": ""
+}
