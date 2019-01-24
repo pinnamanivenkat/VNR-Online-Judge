@@ -6,6 +6,9 @@ var passport = require('passport');
 var LocalStratey = require('passport-local').Strategy;
 var generatePassword = require('generate-password');
 
+
+var question; 
+
 var User = require('./models/user');
 passport.use(new LocalStratey((username, password, done) => {
     User.getUserByUsername(username, function (err, user) {
@@ -104,5 +107,12 @@ router.get('/contest', (req, res) => {
 router.get('/user', function (req, res) {
     res.send(req.user);
 });
-
+router.get('/question', function(req, res) {
+    res.render('question');
+});
 module.exports = router;
+function get_question()
+{
+    question = document.getElementById('noise').value;
+    console.log(question);
+}
