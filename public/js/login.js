@@ -3,10 +3,8 @@ $(() => {
     var strongRegex = new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,24})");
     $('#loginForm').submit(function (e) {
         e.preventDefault();
-        // var username = $('#login').val();
-        // var password = $('#password').val();
-        const username = "15071A05N5";
-        const password = "&h3HRJ6gRU";
+        var username = $('#login').val();
+        var password = $('#password').val();
         if (username.length !== 10) {
             showFeedbackSnackBar("Roll Number should be of 10 characters");
         } else {
@@ -18,7 +16,10 @@ $(() => {
                         username,
                         password
                     },
-                    success: function () {
+                    success: function (data) {
+                        sessionStorage.setItem("loginStatus", true);
+                        sessionStorage.setItem("name", data.name);
+                        sessionStorage.setItem("rollNo", data.username);
                         window.location = '/';
                     }
                 });

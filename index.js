@@ -33,6 +33,16 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
+app.use(function (req, res, next) {
+    res.set('Cache-Control', 'no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0');
+    if(req.user) {
+        res.locals.name = req.user.name;
+        res.locals.rollno = req.user.username;
+    }
+    res.locals.login = req.isAuthenticated();
+    next();
+});
+
 
 // app.use(expressWinston.logger({
 //     transports: [
@@ -68,7 +78,7 @@ app.use(compression());
 
 // app.use(express.static('./public'));
 app.engine('html', require('ejs').renderFile);
-app.set('view engine', 'html');
+app.set('view engine', 'ejs');
 app.enable("jsonp callback");
 app.use(express.static('./public'));
 app.use(flash());

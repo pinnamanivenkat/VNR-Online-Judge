@@ -20,7 +20,6 @@ passport.use(new LocalStratey((username, password, done) => {
         User.comparePassword(password, user.password, function (err, isMatch) {
             if (err) throw err;
             if (isMatch) {
-                delete user.password;
                 return done(null, user);
             } else {
                 return done(null, false, {
@@ -51,7 +50,11 @@ router.get('/login', (req, res) => {
 });
 
 router.post('/login', passport.authenticate('local'), function (req, res) {
-    res.send(req.user);
+    var data = {
+        username: req.user.username,
+        name: req.user.name
+    }
+    res.send(data);
 });
 
 router.post('/createUser', function (req, res) {
@@ -79,9 +82,18 @@ router.post('/createUser', function (req, res) {
     });
 });
 
+router.get('/changePassword', function (req, res) {
+    res.render('changepassword');
+});
+
+router.post('/changePassword',(req,res)=>{
+
+});
+
 router.get('/logout', function (req, res) {
-    req.logout();
-    res.sendStatus(null)
+    req.session.destroy(function (err) {
+        res.redirect('/');
+    });
 });
 
 router.get('/contest', (req, res) => {

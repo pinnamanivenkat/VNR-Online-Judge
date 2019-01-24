@@ -31,7 +31,14 @@ section {
     background: #04695C !important;
 }
 
-.navbar a {
-    padding: 10px;
+.nav-link {
     color: white !important;
+}
+
+.dropdown-item {
+    background: white!important;
+}
+
+.dropdown-item.link:active {
+    background: #04695C!important;
 }
