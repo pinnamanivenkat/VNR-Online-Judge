@@ -6,7 +6,7 @@ $(() => {
         // var username = $('#login').val();
         // var password = $('#password').val();
         const username = "15071A05N5";
-        const password = "Mylan@8033";
+        const password = "&h3HRJ6gRU";
         if (username.length !== 10) {
             showFeedbackSnackBar("Roll Number should be of 10 characters");
         } else {
@@ -19,7 +19,7 @@ $(() => {
                         password
                     },
                     success: function () {
-                        console.log('success');
+                        window.location = '/';
                     }
                 });
             } else {

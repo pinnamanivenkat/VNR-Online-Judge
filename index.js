@@ -6,8 +6,34 @@ var winston = require('winston');
 var routes = require('./routes');
 var bodyParser = require('body-parser');
 var compression = require('compression');
+var mongoose = require('mongoose');
+var cookieParser = require('cookie-parser');
+var session = require('express-session');
+var passport = require('passport');
 
-app.use(bodyParser.urlencoded({ extended: true }));
+var url = "mongodb://localhost:27017/th";
+
+mongoose.connect(url, {
+    useNewUrlParser: true
+});
+
+mongoose.set('useCreateIndex', true);
+
+app.use(bodyParser.urlencoded({
+    extended: false
+}));
+app.use(bodyParser.json());
+app.use(cookieParser());
+app.use(session({
+    secret: 'TuringHutOnlineJudge',
+    saveUninitialized: true,
+    resave: true
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+
 // app.use(expressWinston.logger({
 //     transports: [
 //         new winston.transports.Console()
