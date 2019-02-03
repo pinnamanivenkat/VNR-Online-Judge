@@ -5,8 +5,11 @@ var router = express.Router();
 var passport = require('passport');
 var LocalStratey = require('passport-local').Strategy;
 var generatePassword = require('generate-password');
+var fileUtils = require('./fileUtils');
 
 var User = require('./models/user');
+
+
 passport.use(new LocalStratey((username, password, done) => {
     User.getUserByUsername(username, function (err, user) {
         if (err) {
@@ -129,9 +132,25 @@ router.post('/changePassword', (req, res) => {
     });
 });
 
-router.get('/editProblem', (req, res) => {
-
+router.get('/adminPortal', isAdmin, (req, res) => {
+    res.render('adminPortal');
 });
+
+router.get('/myProblems', isAdmin, (req, res) => {
+    fileUtils.findProblemsByUsername(req.user.username, (err, data) => {
+        let dataToSend = "";
+        if (err) {
+            dataToSend = {};
+        } else {
+            dataToSend = data;
+        }
+        res.render('myproblems', dataToSend)
+    });
+});
+
+router.get('/question', isAdmin, (req, res) => {
+    res.render("question");
+})
 
 router.get('/logout', function (req, res) {
     req.session.destroy(function (err) {
@@ -146,6 +165,15 @@ router.get('/contest', (req, res) => {
 router.get('/user', function (req, res) {
     res.send(req.user);
 });
+
+function isAdmin(req, res, next) {
+    if (req.isAuthenticated() && req.user.userType == "admin") {
+        return next();
+    }
+    res.status(400).json({
+        'message': 'access denied'
+    })
+}
 
 function isLoggedIn(req, res, next) {
     if (req.isAuthenticated())
