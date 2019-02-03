@@ -1,40 +1,67 @@
-$(document).ready(function () {
-    var passOne = $("#passOne").val();
-    var passTwo = $("#passTwo").val();
-    var passThree = $("#passThree").val();
+$(() => {
+    var strongRegex = new RegExp("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.{8,24})");
+    $(document).ready(function () {
+        var passOne = $("#passOne").val();
+        var passTwo = $("#passTwo").val();
+        var passThree = $("#passThree").val();
+        var footerText = $("#footerText");
+        var footer = $("#footer");
 
-    $("#footerText").html("Fields don't match");
+        footerText.html("Enter old password");
 
-    var checkAndChange = function () {
-        if (passOne.length < 1 || passTwo.length < 1) {
-            if ($("#footer").hasClass("correct")) {
-                $("#footer").removeClass("correct").addClass("incorrect");
-                $("#footerText").html("They don't match");
+        var checkAndChange = function () {
+            if (passOne.length >= 8) {
+                if (passTwo.length >= 8 && passThree.length >= 8 && passTwo === passThree) {
+                    footerText.html("Submit");
+                    footer.removeClass("incorrect").addClass("correct");
+                } else {
+                    footerText.html("They don't match");
+                    footer.removeClass('correct').addClass('incorrect');
+                }
             } else {
-                $("#footerText").html("They don't match");
-            }
-        } else if ($("#footer").hasClass("incorrect")) {
-            if (passThree == passTwo) {
-                $("#footer").removeClass("incorrect").addClass("correct");
-                $("#footerText").html("Continue");
-            }
-        } else {
-            if (passThree != passTwo) {
-                $("#footer").removeClass("correct").addClass("incorrect");
-                $("#footerText").html("They don't match");
+                footerText.html("Enter old password");
+                footer.removeClass('correct').addClass('incorrect');
             }
         }
-    }
 
-    $("input").keyup(function () {
-        var newPassOne = $("#passOne").val();
-        var newPassTwo = $("#passTwo").val();
-        var newPassThree = $('#passThree').val();
+        footer.on('click', function () {
+            if (passOne.match(strongRegex) && passTwo.match(strongRegex)) {
+                if (footer.is('.correct')) {
+                    $.ajax({
+                        type: "POST",
+                        url: "/changePassword",
+                        data: {
+                            oldPassword: passOne,
+                            newPassword: passTwo
+                        },
+                        success: function (data) {
+                            if (data.status === 1881) {
+                                alert('Password changed, redirecting');
+                                window.location = '/login';
+                            } else {
+                                alert(data.message)
+                            }
+                        },
+                        error: function (data) {
+                            alert('Some error occured, Please try again');
+                        }
+                    });
+                }
+            } else {
+                alert("password should contain atlest 1 lowercase, 1 uppercase, 1 number");
+            }
+        });
 
-        passOne = newPassOne;
-        passTwo = newPassTwo;
-        passThree = newPassThree;
+        $("input").keyup(function () {
+            var newPassOne = $("#passOne").val();
+            var newPassTwo = $("#passTwo").val();
+            var newPassThree = $('#passThree').val();
 
-        checkAndChange();
+            passOne = newPassOne;
+            passTwo = newPassTwo;
+            passThree = newPassThree;
+
+            checkAndChange();
+        });
     });
 });

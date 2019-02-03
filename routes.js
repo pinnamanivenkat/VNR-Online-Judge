@@ -41,7 +41,6 @@ passport.deserializeUser(function (id, done) {
 });
 
 router.get('/', (req, res) => {
-    console.log(req.session);
     res.render('index');
 });
 
@@ -52,24 +51,34 @@ router.get('/login', (req, res) => {
 router.post('/login', passport.authenticate('local'), function (req, res) {
     var data = {
         username: req.user.username,
-        name: req.user.name
+        name: req.user.name,
+    }
+    if (req.user.userType == "user") {
+        data.redirect = '/';
+    } else {
+        data.redirect = '/adminPortal';
     }
     res.send(data);
 });
 
 router.post('/createUser', function (req, res) {
-    var newUser = new User({
+    let userConfig = {
         _id: req.body.username,
         username: req.body.username,
         password: generatePassword.generate({
             length: 10,
             numbers: true,
-            symbols: true,
             uppercase: true,
             strict: true
         }),
-        name: req.body.name
-    });
+        name: req.body.name,
+    }
+    if (req.body.addUserType) {
+        userConfig.userType = "admin";
+    } else {
+        userConfig.userType = "user";
+    }
+    var newUser = new User(userConfig);
     User.createUser(newUser, function (password, err) {
         if (err) {
             res.send(err);
@@ -86,7 +95,41 @@ router.get('/changePassword', function (req, res) {
     res.render('changepassword');
 });
 
-router.post('/changePassword',(req,res)=>{
+router.post('/changePassword', (req, res) => {
+    User.comparePassword(req.body.oldPassword, req.user.password, function (err, isMatch) {
+        let status = 433,
+            message = "";
+        if (err) {
+            message = "Please login again";
+        } else if (isMatch) {
+            let username = req.user._id,
+                password = req.body.newPassword;
+            status = 1881;
+            User.changePassword(username, password, (err, status) => {
+                if (err) {
+                    status = 433;
+                    message = "Please login again";
+                } else {
+                    status = 1881;
+                }
+                res.send({
+                    status,
+                    message
+                })
+            });
+        } else {
+            message = "Please enter correct password";
+        }
+        if (status == 433) {
+            res.send({
+                status,
+                message
+            });
+        }
+    });
+});
+
+router.get('/editProblem', (req, res) => {
 
 });
 
@@ -97,12 +140,19 @@ router.get('/logout', function (req, res) {
 });
 
 router.get('/contest', (req, res) => {
-    console.log(req);
     res.sendStatus(200);
 });
 
 router.get('/user', function (req, res) {
     res.send(req.user);
 });
+
+function isLoggedIn(req, res, next) {
+    if (req.isAuthenticated())
+        return next();
+    res.status(400).json({
+        'message': 'access denied'
+    });
+}
 
 module.exports = router;

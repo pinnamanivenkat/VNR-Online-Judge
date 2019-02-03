@@ -18,6 +18,7 @@ mongoose.connect(url, {
 });
 
 mongoose.set('useCreateIndex', true);
+mongoose.set('useFindAndModify', false);
 
 app.use(bodyParser.urlencoded({
     extended: false
