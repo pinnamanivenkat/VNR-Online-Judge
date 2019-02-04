@@ -33,6 +33,7 @@
     "octicons": "^8.3.0",
     "passport": "^0.4.0",
     "passport-local": "^1.0.0",
+    "shelljs": "^0.8.3",
     "simditor": "^2.3.23",
     "winston": "^3.1.0"
   },

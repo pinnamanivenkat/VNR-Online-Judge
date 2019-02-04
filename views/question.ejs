@@ -14,11 +14,13 @@
 <body>
 
     <section class="container">
-        <p>Problem code: <input type="text" name="problem code" placeholder="VNRON01" id="problem code"></input></p>
-        <textarea id="editor" data-autosave="editor-content" autofocus required></textarea>
-        <center>
-            <button id="save">Save</button>
-        </center>
+        <form id="questionForm" method="POST" action="/saveProblem">
+            <p>Problem code: <input type="text" name="problemCode" placeholder="VNRON01" id="problemCode"></input></p>
+            <textarea id="editor" name="questionText" data-autosave="editor-content" autofocus required></textarea>
+            <center>
+                <input type="submit"></input>
+            </center>
+        </form>
     </section>
 
     <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="

@@ -5,7 +5,6 @@ var router = express.Router();
 var passport = require('passport');
 var LocalStratey = require('passport-local').Strategy;
 var generatePassword = require('generate-password');
-var fileUtils = require('./fileUtils');
 
 var User = require('./models/user');
 
@@ -137,19 +136,15 @@ router.get('/adminPortal', isAdmin, (req, res) => {
 });
 
 router.get('/myProblems', isAdmin, (req, res) => {
-    fileUtils.findProblemsByUsername(req.user.username, (err, data) => {
-        let dataToSend = "";
-        if (err) {
-            dataToSend = {};
-        } else {
-            dataToSend = data;
-        }
-        res.render('myproblems', dataToSend)
-    });
+
 });
 
 router.get('/question', isAdmin, (req, res) => {
     res.render("question");
+})
+
+router.post('/saveProblem', isAdmin, (req, res) => {
+
 })
 
 router.get('/logout', function (req, res) {
