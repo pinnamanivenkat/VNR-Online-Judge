@@ -14,13 +14,23 @@
 <body>
 
     <section class="container">
-        <form id="questionForm" method="POST" action="/saveProblem">
+        <form id="questionForm" method="POST" action="/createProblem" target="hidden-iframe" onsubmit="return false" enctype="multipart/form-data">
+            <% if(method == "create") {%>
             <p>Problem code: <input type="text" name="problemCode" placeholder="VNRON01" id="problemCode"></input></p>
-            <textarea id="editor" name="questionText" data-autosave="editor-content" autofocus required></textarea>
-            <center>
-                <input type="submit"></input>
-            </center>
+            <% } %>
+            <textarea id="editor" name="questionText"></textarea>
+            <div id="testCaseHolder">
+                <div>
+                    <h5>Test cases:</h5>
+                    <button id="createTestcase">Create testcase</button>
+                </div>
+            </div>
         </form>
+        <center>
+            <button id="submit">Submit</input>
+        </center>
+
+        <iframe name="hidden-iframe" style="display: none;"></iframe>
     </section>
 
     <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="

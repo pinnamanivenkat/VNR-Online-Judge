@@ -5,9 +5,12 @@ var router = express.Router();
 var passport = require('passport');
 var LocalStratey = require('passport-local').Strategy;
 var generatePassword = require('generate-password');
+const formidable = require('formidable');
+var path = require('path');
+var fs = require('fs');
 
-var User = require('./models/user');
-
+var User = require('./models/user'),
+    Problem = require('./models/problem');
 
 passport.use(new LocalStratey((username, password, done) => {
     User.getUserByUsername(username, function (err, user) {
@@ -136,16 +139,88 @@ router.get('/adminPortal', isAdmin, (req, res) => {
 });
 
 router.get('/myProblems', isAdmin, (req, res) => {
-
+    res.render('myproblems');
 });
 
 router.get('/question', isAdmin, (req, res) => {
-    res.render("question");
+    if (req.query.problemCode) {
+        Problem.getProblemData(req.query.problemCode, (err, problemData) => {
+            if (err || problemData.author != req.user.username) {
+                res.status(400).json({
+                    'message': 'access denied'
+                })
+            } else {
+                res.render("question", {
+                    "method": "update"
+                });
+            }
+        })
+    } else {
+        res.render("question", {
+            "method": "create"
+        });
+    }
 })
 
-router.post('/saveProblem', isAdmin, (req, res) => {
+router.post('/createProblem', isAdmin, (req, res) => {
+    var form = formidable.IncomingForm();
+    form.parse(req);
+    var problemPath = path.join(__dirname, "problem");
+    if (!fs.existsSync(problemPath)) {
+        fs.mkdirSync(problemPath);
+    }
+    var inputPath, outputPath;
+    form.on('fileBegin', function (name, file) {
+        var type;
+        if (name[0] == 'i') {
+            type = inputPath;
+        } else {
+            type = outputPath;
+        }
+        file.path = path.join(type, name);
+    })
+    form.on('field', function (name, value) {
+        if (name == "questionCode") {
+            problemPath = path.join(problemPath, value);
+            if (fs.existsSync(problemPath)) {
+                res.send({
+                    status: 400,
+                    message: "Problem with same code exist"
+                });
+            }
+            inputPath = path.join(problemPath, "input");
+            outputPath = path.join(problemPath, "output");
+            fs.mkdirSync(problemPath);
+            fs.mkdirSync(inputPath);
+            fs.mkdirSync(outputPath);
+        } else if (name == "questionText") {
+            questionDescriptionPath = path.join(problemPath, 'description.txt');
+            fs.writeFileSync(questionDescriptionPath, value);
+        }
+    });
+    form.on(['error', 'aborted'], function () {
+        res.send({
+            status: 400
+        })
+    });
+    form.on('end', function () {
+        res.send({
+            status: 200
+        })
+    })
+});
 
-})
+router.post('/updateProblem', isAdmin, (req, res) => {
+    Problem.getProblemData(req.body.problemCode, (err, problemData) => {
+        if (err || problemData.author != req.user.username) {
+            res.status(400).json({
+                'message': 'access denied'
+            })
+        } else {
+            //Update Problem
+        }
+    })
+});
 
 router.get('/logout', function (req, res) {
     req.session.destroy(function (err) {
@@ -155,6 +230,7 @@ router.get('/logout', function (req, res) {
 
 router.get('/contest', (req, res) => {
     res.sendStatus(200);
+
 });
 
 router.get('/user', function (req, res) {

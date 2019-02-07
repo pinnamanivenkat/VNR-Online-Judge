@@ -11,7 +11,7 @@ var cookieParser = require('cookie-parser');
 var session = require('express-session');
 var passport = require('passport');
 
-var url = "mongodb://localhost:27017/th";
+var url = "mongodb://turinghut:cnccit12@ds115799.mlab.com:15799/th";
 
 mongoose.connect(url, {
     useNewUrlParser: true
