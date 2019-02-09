@@ -1,7 +1,4 @@
 $(() => {
-
-    var data = "{{method}}";
-    console.log(data);
     var editor = new Simditor({
         textarea: $('#editor'),
         toolbar: true,
@@ -39,6 +36,7 @@ $(() => {
         var formData = new FormData();
         formData.append('questionCode', $('#problemCode').val());
         formData.append('questionText', editor.getValue());
+        formData.append('difficultyLevel', $('#difficultyLevel').val());
         console.log('sample');
         $('input[type="file"]').each(function (idx, element) {
             var file = $(this)[0].files[0];
@@ -60,6 +58,7 @@ $(() => {
             contentType: false,
             data: formData,
             success: function (data) {
+                console.log(data.message);
                 if (data.status == 200) {
                     window.location = '/myProblems';
                 }

@@ -1,6 +1,4 @@
-var mongoose = require('mongoose'),
-    path = require('path'),
-    fs = require('fs');
+var mongoose = require('mongoose');
 
 var ProblemSchema = mongoose.Schema({
     _id: {
@@ -8,6 +6,10 @@ var ProblemSchema = mongoose.Schema({
         required: true,
     },
     author: {
+        type: String,
+        required: true
+    },
+    username: {
         type: String,
         required: true
     },
@@ -23,39 +25,28 @@ module.exports.getProblemData = function (problemCode, callback) {
     Problem.findOne({
         _id: problemCode
     }, (err, res) => {
-        if (err) {
-            callback(err);
-        }
-        callback(undefined, res);
+        callback(err,res);
     })
 };
 
-module.exports.getProblemsByAuthor = function (author, callback) {
-
+module.exports.getProblemsByUsername = function (username, callback) {
+    Problem.find({
+        username: username
+    }, function (err, docs) {
+        callback(err,docs);
+    })
 };
 
 module.exports.updateProblem = function (problemCode, newData, callback) {
-
+    
 };
 
-module.exports.createProblem = function (problemData, callback) {
-    var dbData = {
-        _id: problemData.problemCode,
-        author: problemData.author,
-        difficultyLevel: problemData.difficultyLevel
-    };
+module.exports.createProblem = function (dbData, callback) {
     Problem.create(dbData, function (err, newObject) {
         if (err) {
             callback(err);
         } else {
-            var userDirectory = path.join(__dirname, "problems", problemData.author);
-            if (!fs.existsSync(userDirectory)) {
-                fs.mkdirSync(userDirectory);
-            }
-            var userProblemDirectory = path.join(userDirectory, dbData.author);
-            fs.mkdirSync(userProblemDirectory);
-            fs.writeFileSync(path.join(userProblemDirectory, dbData.problemCode), problemData.problemDescription);
-            // Write the test cases
+            callback(undefined);
         }
     });
 };

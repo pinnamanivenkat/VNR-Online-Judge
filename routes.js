@@ -8,6 +8,7 @@ var generatePassword = require('generate-password');
 const formidable = require('formidable');
 var path = require('path');
 var fs = require('fs');
+var fsExtra = require('fs-extra');
 
 var User = require('./models/user'),
     Problem = require('./models/problem');
@@ -139,33 +140,60 @@ router.get('/adminPortal', isAdmin, (req, res) => {
 });
 
 router.get('/myProblems', isAdmin, (req, res) => {
-    res.render('myproblems');
+    Problem.getProblemsByUsername(req.user.username, (err, docs) => {
+        console.log(docs);
+        res.render('myproblems', {
+            problems: docs
+        });
+    });
 });
 
 router.get('/question', isAdmin, (req, res) => {
     if (req.query.problemCode) {
-        Problem.getProblemData(req.query.problemCode, (err, problemData) => {
+        Problem.getProblemDfata(req.query.problemCode, (err, problemData) => {
             if (err || problemData.author != req.user.username) {
                 res.status(400).json({
                     'message': 'access denied'
                 })
             } else {
-                res.render("question", {
+                res.render("createQuestion", {
                     "method": "update"
                 });
             }
         })
     } else {
-        res.render("question", {
+        res.render("createQuestion", {
             "method": "create"
         });
     }
+});
+
+router.get('/problem/:questionId', isAdmin, (req, res) => {
+    console.log(req.params.questionId);
+    Problem.getProblemData(req.params.questionId, (err, problemData) => {
+        console.log(problemData);
+        if (err) {
+            res.sendStatus(404);
+        } else {
+            if (!problemData || problemData.username != req.user.username) {
+                res.sendStatus(404);
+            } else {
+                var problemPath = path.join(__dirname, 'problem', problemData._id);
+                var description = fs.readFileSync(path.join(problemPath, "description.txt"));
+                res.render("problem", {
+                    description
+                });
+            }
+        }
+    });
 })
 
 router.post('/createProblem', isAdmin, (req, res) => {
+    var problemConfig = {};
     var form = formidable.IncomingForm();
     form.parse(req);
     var problemPath = path.join(__dirname, "problem");
+    var questionPath;
     if (!fs.existsSync(problemPath)) {
         fs.mkdirSync(problemPath);
     }
@@ -182,12 +210,16 @@ router.post('/createProblem', isAdmin, (req, res) => {
     form.on('field', function (name, value) {
         if (name == "questionCode") {
             problemPath = path.join(problemPath, value);
+            questionPath = problemPath;
             if (fs.existsSync(problemPath)) {
                 res.send({
                     status: 400,
                     message: "Problem with same code exist"
                 });
             }
+            problemConfig["_id"] = value;
+            problemConfig["author"] = req.user.name;
+            problemConfig["username"] = req.user.username;
             inputPath = path.join(problemPath, "input");
             outputPath = path.join(problemPath, "output");
             fs.mkdirSync(problemPath);
@@ -196,17 +228,32 @@ router.post('/createProblem', isAdmin, (req, res) => {
         } else if (name == "questionText") {
             questionDescriptionPath = path.join(problemPath, 'description.txt');
             fs.writeFileSync(questionDescriptionPath, value);
+        } else if (name == "difficultyLevel") {
+            problemConfig["difficultyLevel"] = value;
         }
     });
     form.on(['error', 'aborted'], function () {
+        fsExtra.removeSync(questionPath);
         res.send({
             status: 400
         })
     });
     form.on('end', function () {
-        res.send({
-            status: 200
-        })
+        //Save the problem
+        Problem.createProblem(problemConfig, (err) => {
+            console.log(err);
+            if (err) {
+                fsExtra.removeSync(questionPath);
+                res.send({
+                    status: 400,
+                    message: "Some error occured, Please try again"
+                });
+            } else {
+                res.send({
+                    status: 200
+                });
+            }
+        });
     })
 });
 
