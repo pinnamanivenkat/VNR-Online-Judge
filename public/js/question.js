@@ -54,13 +54,14 @@ $(() => {
             contentType: false,
             dataType: 'json',
             processData: false,
-
             contentType: false,
             data: formData,
             success: function (data) {
                 console.log(data.message);
                 if (data.status == 200) {
                     window.location = '/myProblems';
+                } else if(data.status == 400) {
+                    alert(data.message);
                 }
             }
         })

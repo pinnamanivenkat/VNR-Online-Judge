@@ -14,7 +14,24 @@
 
 <body>
 
-    <%= description %>
+    <section class="container">
+        <div class="row">
+            <div class="col-12">
+                <%- description %>
+            </div>
+        </div>
+        <select name="difficultyLevel" id="difficultyLevel">
+            <option value="c">C</option>
+            <option value="cpp">C++</option>
+            <option value="java">Java</option>
+            <option value="python">Python</option>
+        </select>
+        <div class="row">
+            <div class="col-12">
+                <textarea id="editor" name="userCode"></textarea>
+            </div>
+        </div>
+    </section>
 
     <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
         crossorigin="anonymous"></script>

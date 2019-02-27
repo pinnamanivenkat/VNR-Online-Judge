@@ -168,30 +168,31 @@ router.get('/question', isAdmin, (req, res) => {
     }
 });
 
-router.get('/problem/:questionId', isAdmin, (req, res) => {
+router.get('/problem/:questionId', (req, res) => {
     console.log(req.params.questionId);
     Problem.getProblemData(req.params.questionId, (err, problemData) => {
-        console.log(problemData);
         if (err) {
-            res.sendStatus(404);
+            res.send(404);
         } else {
-            if (!problemData || problemData.username != req.user.username) {
-                res.sendStatus(404);
-            } else {
-                var problemPath = path.join(__dirname, 'problem', problemData._id);
+            // TODO: add feature of problem visibility
+            var problemPath = path.join(__dirname, 'problem', problemData._id);
+            if (fs.existsSync(problemPath)) {
                 var description = fs.readFileSync(path.join(problemPath, "description.txt"));
                 res.render("problem", {
                     description
                 });
+            } else {
+                res.sendStatus(404);
             }
         }
     });
 })
 
-router.post('/createProblem', isAdmin, (req, res) => {
+router.post('/createProblem', (req, res) => {
     var problemConfig = {};
     var form = formidable.IncomingForm();
     form.parse(req);
+    let issueCreating = false;
     var problemPath = path.join(__dirname, "problem");
     var questionPath;
     if (!fs.existsSync(problemPath)) {
@@ -199,37 +200,46 @@ router.post('/createProblem', isAdmin, (req, res) => {
     }
     var inputPath, outputPath;
     form.on('fileBegin', function (name, file) {
-        var type;
-        if (name[0] == 'i') {
-            type = inputPath;
-        } else {
-            type = outputPath;
-        }
-        file.path = path.join(type, name);
-    })
-    form.on('field', function (name, value) {
-        if (name == "questionCode") {
-            problemPath = path.join(problemPath, value);
-            questionPath = problemPath;
-            if (fs.existsSync(problemPath)) {
-                res.send({
-                    status: 400,
-                    message: "Problem with same code exist"
-                });
+        if (!issueCreating) {
+            var type;
+            if (name[0] == 'i') {
+                type = inputPath;
+            } else {
+                type = outputPath;
             }
-            problemConfig["_id"] = value;
-            problemConfig["author"] = req.user.name;
-            problemConfig["username"] = req.user.username;
-            inputPath = path.join(problemPath, "input");
-            outputPath = path.join(problemPath, "output");
-            fs.mkdirSync(problemPath);
-            fs.mkdirSync(inputPath);
-            fs.mkdirSync(outputPath);
-        } else if (name == "questionText") {
-            questionDescriptionPath = path.join(problemPath, 'description.txt');
-            fs.writeFileSync(questionDescriptionPath, value);
-        } else if (name == "difficultyLevel") {
-            problemConfig["difficultyLevel"] = value;
+            console.log(type + " " + name);
+            file.path = path.join(type, name);
+        }
+    });
+    form.on('field', function (name, value) {
+        if (!issueCreating) {
+            if (name == "questionCode") {
+                problemPath = path.join(problemPath, value);
+                questionPath = problemPath;
+                console.log(problemPath);
+                if (fs.existsSync(problemPath)) {
+                    console.log('sample')
+                    res.send({
+                        status: 400,
+                        message: "Problem with same code exist"
+                    });
+                    issueCreating = true;
+                } else {
+                    problemConfig["_id"] = value;
+                    problemConfig["author"] = req.user.name;
+                    problemConfig["username"] = req.user.username;
+                    inputPath = path.join(problemPath, "input");
+                    outputPath = path.join(problemPath, "output");
+                    fs.mkdirSync(problemPath);
+                    fs.mkdirSync(inputPath);
+                    fs.mkdirSync(outputPath);
+                }
+            } else if (name == "questionText") {
+                questionDescriptionPath = path.join(problemPath, 'description.txt');
+                fs.writeFileSync(questionDescriptionPath, value);
+            } else if (name == "difficultyLevel") {
+                problemConfig["difficultyLevel"] = value;
+            }
         }
     });
     form.on(['error', 'aborted'], function () {
@@ -239,21 +249,23 @@ router.post('/createProblem', isAdmin, (req, res) => {
         })
     });
     form.on('end', function () {
-        //Save the problem
-        Problem.createProblem(problemConfig, (err) => {
-            console.log(err);
-            if (err) {
-                fsExtra.removeSync(questionPath);
-                res.send({
-                    status: 400,
-                    message: "Some error occured, Please try again"
-                });
-            } else {
-                res.send({
-                    status: 200
-                });
-            }
-        });
+        if (!issueCreating) {
+            //Save the problem
+            Problem.createProblem(problemConfig, (err) => {
+                console.log(err);
+                if (err) {
+                    fsExtra.removeSync(questionPath);
+                    res.send({
+                        status: 400,
+                        message: "Some error occured, Please try again"
+                    });
+                } else {
+                    res.send({
+                        status: 200
+                    });
+                }
+            });
+        }
     })
 });
 
