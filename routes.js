@@ -11,7 +11,8 @@ var fs = require('fs');
 var fsExtra = require('fs-extra');
 
 var User = require('./models/user'),
-    Problem = require('./models/problem');
+    Problem = require('./models/problem'),
+    Submission = require('./models/submission');
 
 passport.use(new LocalStratey((username, password, done) => {
     User.getUserByUsername(username, function (err, user) {
@@ -168,6 +169,37 @@ router.get('/question', isAdmin, (req, res) => {
     }
 });
 
+router.post('/submit/:questionId', isLoggedIn, (req, res) => {
+    // TODO: submit only when problem is visible
+    var submissionObject = {
+        username: req.user.username,
+        problemCode: req.body.problemCode,
+        status: "UEX",
+        score: 0
+    };
+    console.log(submissionObject);
+    Submission.createSubmission(submissionObject, (err, data) => {
+        console.log(data);
+        if (err) {
+            res.send({
+                status: 400
+            })
+        } else {
+            let submissionPath = path.join(__dirname,"submissions","_"+data._id+"."+req.body.language);
+            fs.writeFileSync(submissionPath,req.body.code);
+            // TODO: Create submission queue and insert submission
+            res.send({
+                status: 200,
+                submissionCode: data._id
+            })
+        }
+    });
+});
+
+router.get('/viewsolution/:submissionCode', (req, res) => {
+    // TODO: Render submission page which should contain status,score,code
+});
+
 router.get('/problem/:questionId', (req, res) => {
     console.log(req.params.questionId);
     Problem.getProblemData(req.params.questionId, (err, problemData) => {
@@ -179,7 +211,8 @@ router.get('/problem/:questionId', (req, res) => {
             if (fs.existsSync(problemPath)) {
                 var description = fs.readFileSync(path.join(problemPath, "description.txt"));
                 res.render("problem", {
-                    description
+                    description,
+                    problemCode: req.params.questionId
                 });
             } else {
                 res.sendStatus(404);

@@ -82,7 +82,7 @@ app.engine('html', require('ejs').renderFile);
 app.set('view engine', 'ejs');
 app.enable("jsonp callback");
 app.use(express.static('./public'));
-app.use(express.static(__dirname+"/node_modules/"));
+app.use(express.static("./node_modules"));
 app.use(flash());
 
 app.listen(8080, () => {
