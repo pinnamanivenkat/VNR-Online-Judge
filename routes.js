@@ -9,6 +9,7 @@ const formidable = require('formidable');
 var path = require('path');
 var fs = require('fs');
 var fsExtra = require('fs-extra');
+var judge = require('./judge');
 
 var User = require('./models/user'),
     Problem = require('./models/problem'),
@@ -181,12 +182,18 @@ router.post('/submit/:questionId', isLoggedIn, (req, res) => {
     Submission.createSubmission(submissionObject, (err, data) => {
         console.log(data);
         if (err) {
+            console.log(err);
             res.send({
                 status: 400
             })
         } else {
-            let submissionPath = path.join(__dirname,"submissions","_"+data._id+"."+req.body.language);
+            let submissionPath = path.join(__dirname,"submissions","_"+data._id);
+            if(!fs.existsSync(submissionPath)) {
+                fs.mkdirSync(submissionPath);
+            }
+            submissionPath = path.join(submissionPath,"_"+data._id+"."+req.body.language);
             fs.writeFileSync(submissionPath,req.body.code);
+            judge.compileFile(submissionPath,req.body.language);
             // TODO: Create submission queue and insert submission
             res.send({
                 status: 200,
@@ -303,6 +310,7 @@ router.post('/createProblem', (req, res) => {
 });
 
 router.post('/updateProblem', isAdmin, (req, res) => {
+    // TODO: update Problem
     Problem.getProblemData(req.body.problemCode, (err, problemData) => {
         if (err || problemData.author != req.user.username) {
             res.status(400).json({
