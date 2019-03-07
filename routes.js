@@ -69,6 +69,10 @@ router.post('/login', passport.authenticate('local'), function (req, res) {
     res.send(data);
 });
 
+router.get('/createUser', (req, res) => {
+    res.render('createUser');
+});
+
 router.post('/createUser', function (req, res) {
     let userConfig = {
         _id: req.body.username,

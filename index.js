@@ -12,6 +12,11 @@ var session = require('express-session');
 var passport = require('passport');
 
 var url = "mongodb://localhost:27017/th";
+var db_url = process.env.DB_URL
+
+if(process.env.DB_URL) {
+    url = db_url
+}
 
 mongoose.connect(url, {
     useNewUrlParser: true
