@@ -87,4 +87,4 @@ app.use(flash());
 
 app.listen(8080, () => {
     console.log('server stated on port 8080')
-})
+});

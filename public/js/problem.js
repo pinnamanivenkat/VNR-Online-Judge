@@ -13,6 +13,7 @@ $(() => {
                 problemCode
             },
             success: function (data) {
+                alert('sample');
                 if (data.status == 200) {
                     window.location = '/viewsolution/'+data.submissionCode;
                 } else {

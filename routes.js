@@ -187,23 +187,33 @@ router.post('/submit/:questionId', isLoggedIn, (req, res) => {
                 status: 400
             })
         } else {
-            let submissionPath = path.join(__dirname,"submissions","_"+data._id);
+            let submissionPath = path.join(__dirname,"submissions");
+            if(!fs.existsSync(submissionPath)) {
+                fs.mkdirSync(submissionPath);
+            }
+            submissionPath = path.join(submissionPath,"_"+data._id);
             if(!fs.existsSync(submissionPath)) {
                 fs.mkdirSync(submissionPath);
             }
             submissionPath = path.join(submissionPath,"_"+data._id+"."+req.body.language);
             fs.writeFileSync(submissionPath,req.body.code);
-            judge.compileFile(submissionPath,req.body.language);
+            judge.execute({
+                submissionPath,
+                submissionId: data._id,
+                language: req.body.language,
+                problemCode: req.body.problemCode
+            });
             // TODO: Create submission queue and insert submission
             res.send({
                 status: 200,
                 submissionCode: data._id
-            })
+            });
         }
     });
 });
 
 router.get('/viewsolution/:submissionCode', (req, res) => {
+    res.render('viewSolution');
     // TODO: Render submission page which should contain status,score,code
 });
 
@@ -319,7 +329,7 @@ router.post('/updateProblem', isAdmin, (req, res) => {
         } else {
             //Update Problem
         }
-    })
+    });
 });
 
 router.get('/logout', function (req, res) {
