@@ -1,4 +1,4 @@
-var kue = require('kue');
+var bull = require('bull');
 var path = require('path');
 var fs = require('fs');
 const {
@@ -8,53 +8,68 @@ const {
     python,
     java
 } = require('compile-run');
-var queue = kue.createQueue({
-    redis: {
-        host: "34.73.94.204"
-    }
-});
 
-queue.watchStuckJobs();
+var queue = new bull('execute', 'redis://34.73.94.204:6379');
 
 module.exports.execute = function (data) {
-    console.log('sample');
-    queue.create('execute', JSON.stringify(data)).removeOnComplete(true).attempts(3).save();
+    queue.add(data);
 }
 
-queue.process('execute', 5, (job, done) => {
-    console.log('execute');
-    job.data = JSON.parse(job.data);
-    console.log(job.data);
+queue.process((job, done) => {
     if (job.data.language == 'c') {
-        executeCode(c, job.data);
+        executeCode(c, job.data, done);
     } else if (job.data.language == 'cpp') {
-        executeCode(cpp, job.data);
+        executeCode(cpp, job.data, done);
     } else if (job.data.language == 'java') {
-        executeCode(java, job.data);
+        executeCode(java, job.data, done);
     } else {
-        executeCode(python, job.data);
+        executeCode(python, job.data, done);
     }
-    done();
 });
 
-function executeCode(executor,data) {
+function executeCode(executor, data, done) {
     console.log(data.problemCode);
-    let problemPath = path.join(__dirname,"problem",data.problemCode);
-    let inputPath = path.join(problemPath,"input");
+    let problemPath = path.join(__dirname, "problem", data.problemCode);
+    let inputPath = path.join(problemPath, "input");
+    let outputPath = path.join(problemPath, "output");
+    executionResult = [];
+    var counter = 0;
     fs.readdirSync(inputPath).forEach(file => {
-        let inputFile = path.join(inputPath,file);
-        console.log(executor);
-        executor.runFile(data.submissionPath,{
-            stdin: fs.readFileSync(inputFile)
-        },(err,result) => {
-            if(err) {
+        let inputFile = path.join(inputPath, file);
+        let outputFile = path.join(outputPath, "output_"+(counter++));
+        let input = fs.readFileSync(inputFile).toString();
+        let output = fs.readFileSync(outputFile).toString();
+        console.log(input);
+        console.log(output);
+        executor.runFile(data.submissionFile, {
+            stdin: input,
+            timeout: 1000
+        }, (err, result) => {
+            if (err) {
                 console.log(err);
             } else {
+                if (result.errorType) {
+                    if (result.errorType == 'compile-time') {
+                        executionResult.push({
+                            status: "CTE"
+                        });
+                    } else {
+                        executionResult.push({
+                            status: "RTE"
+                        });
+                    }
+                } else {
+                    if (result.stdout == output) {
+                        executionResult.push({
+                            status: "AC"
+                        })
+                    }
+                }
                 console.log(result);
             }
+            fs.writeFileSync(path.join(data.submissionPath, "status.json"), JSON.stringify(executionResult));
         });
         console.log(file);
-    })
+    });
+    done();
 }
-
-kue.app.listen(3000);

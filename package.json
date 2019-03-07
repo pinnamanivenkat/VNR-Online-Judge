@@ -19,6 +19,7 @@
   "dependencies": {
     "bcrypt-nodejs": "0.0.3",
     "body-parser": "^1.18.3",
+    "bull": "^3.7.0",
     "code-prettify": "^0.1.0",
     "codemirror": "^5.44.0",
     "coffee-resque": "^0.1.11",

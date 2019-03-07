@@ -199,10 +199,11 @@ router.post('/submit/:questionId', isLoggedIn, (req, res) => {
             if(!fs.existsSync(submissionPath)) {
                 fs.mkdirSync(submissionPath);
             }
-            submissionPath = path.join(submissionPath,"_"+data._id+"."+req.body.language);
-            fs.writeFileSync(submissionPath,req.body.code);
+            submissionFile = path.join(submissionPath,"_"+data._id+"."+req.body.language);
+            fs.writeFileSync(submissionFile,req.body.code);
             judge.execute({
                 submissionPath,
+                submissionFile,
                 submissionId: data._id,
                 language: req.body.language,
                 problemCode: req.body.problemCode
@@ -344,7 +345,6 @@ router.get('/logout', function (req, res) {
 
 router.get('/contest', (req, res) => {
     res.sendStatus(200);
-
 });
 
 router.get('/user', function (req, res) {
