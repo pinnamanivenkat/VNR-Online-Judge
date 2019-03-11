@@ -37,6 +37,7 @@ $(() => {
         formData.append('questionCode', $('#problemCode').val());
         formData.append('questionText', editor.getValue());
         formData.append('difficultyLevel', $('#difficultyLevel').val());
+        formData.append('visiblility',$('visiblility').val());
         console.log('sample');
         $('input[type="file"]').each(function (idx, element) {
             var file = $(this)[0].files[0];

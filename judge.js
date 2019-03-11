@@ -9,7 +9,12 @@ const {
     java
 } = require('compile-run');
 
-var queue = new bull('execute', 'redis://34.73.70.38:6379');
+var queue = new bull('execute', {
+    redis: {
+        host: "34.73.76.249",
+        port: "6379"
+    }
+});
 
 module.exports.execute = function (data) {
     queue.add(data);

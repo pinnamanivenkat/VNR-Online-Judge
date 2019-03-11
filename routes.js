@@ -13,7 +13,8 @@ var judge = require('./judge');
 
 var User = require('./models/user'),
     Problem = require('./models/problem'),
-    Submission = require('./models/submission');
+    Submission = require('./models/submission'),
+    Contest = require('./models/contest');
 
 passport.use(new LocalStratey((username, password, done) => {
     User.getUserByUsername(username, function (err, user) {
@@ -191,16 +192,16 @@ router.post('/submit/:questionId', isLoggedIn, (req, res) => {
                 status: 400
             })
         } else {
-            let submissionPath = path.join(__dirname,"submissions");
-            if(!fs.existsSync(submissionPath)) {
+            let submissionPath = path.join(__dirname, "submissions");
+            if (!fs.existsSync(submissionPath)) {
                 fs.mkdirSync(submissionPath);
             }
-            submissionPath = path.join(submissionPath,"_"+data._id);
-            if(!fs.existsSync(submissionPath)) {
+            submissionPath = path.join(submissionPath, "_" + data._id);
+            if (!fs.existsSync(submissionPath)) {
                 fs.mkdirSync(submissionPath);
             }
-            submissionFile = path.join(submissionPath,"_"+data._id+"."+req.body.language);
-            fs.writeFileSync(submissionFile,req.body.code);
+            submissionFile = path.join(submissionPath, "_" + data._id + "." + req.body.language);
+            fs.writeFileSync(submissionFile, req.body.code);
             judge.execute({
                 submissionPath,
                 submissionFile,
@@ -269,6 +270,7 @@ router.post('/createProblem', (req, res) => {
     });
     form.on('field', function (name, value) {
         if (!issueCreating) {
+            console.log(name + " " + value);
             if (name == "questionCode") {
                 problemPath = path.join(problemPath, value);
                 questionPath = problemPath;
@@ -284,7 +286,6 @@ router.post('/createProblem', (req, res) => {
                     problemConfig["_id"] = value;
                     problemConfig["author"] = req.user.name;
                     problemConfig["username"] = req.user.username;
-                    problemConfig["visiblility"] = req.user.visiblility;
                     inputPath = path.join(problemPath, "input");
                     outputPath = path.join(problemPath, "output");
                     fs.mkdirSync(problemPath);
@@ -296,6 +297,9 @@ router.post('/createProblem', (req, res) => {
                 fs.writeFileSync(questionDescriptionPath, value);
             } else if (name == "difficultyLevel") {
                 problemConfig["difficultyLevel"] = value;
+            } else if (name == "visiblility") {
+                problemConfig["visible"] = (value == "true");
+                console.log(name + " " + value);
             }
         }
     });
@@ -345,9 +349,28 @@ router.get('/logout', function (req, res) {
     });
 });
 
-router.get('/createContest',(req,res) => {
-    res.render('createContest');
-})
+router.get('/createContest', isAdmin, (req, res) => {
+    let problems;
+    Problem.getProblemsByUsername(req.user.username, (err, docs) => {
+        if (err) {
+            problems = [];
+        } else {
+            problems = docs;
+        }
+        res.render('createContest', {
+            problems
+        });
+    });
+});
+
+router.post('/createContest', isAdmin, (req, res) => {
+    console.log(req.body);
+    Contest.createContest({
+
+    }, function (err) {
+
+    });
+});
 
 router.get('/contest', (req, res) => {
     res.sendStatus(200);

@@ -19,11 +19,21 @@
             <% if(method == "create") {%>
             <p>Problem code: <input type="text" name="problemCode" placeholder="VNRON01" id="problemCode"></input></p>
             <% } %>
-            <select name="difficultyLevel" id="difficultyLevel">
-                <option value="easy">Easy</option>
-                <option value="medium">Medium</option>
-                <option value="hard">Hard</option>
-            </select>
+            <div class="row">
+                <div class="col-6">
+                    <select name="difficultyLevel" id="difficultyLevel">
+                        <option value="easy">Easy</option>
+                        <option value="medium">Medium</option>
+                        <option value="hard">Hard</option>
+                    </select>
+                </div>
+                <div class="col-6">
+                    <select name="visiblility" id="visiblility">
+                        <option value="true">Visible</option>
+                        <option value="false">Not Visible</option>
+                    </select>
+                </div>
+            </div>
             <textarea id="editor" name="questionText"></textarea>
             <div id="testCaseHolder">
                 <div>
