@@ -1,15 +1,16 @@
-var express = require('express');
-var mongoose = require('mongoose');
-var url = require('url');
-var router = express.Router();
-var passport = require('passport');
-var LocalStratey = require('passport-local').Strategy;
-var generatePassword = require('generate-password');
-const formidable = require('formidable');
-var path = require('path');
-var fs = require('fs');
-var fsExtra = require('fs-extra');
-var judge = require('./judge');
+var express = require('express')
+var mongoose = require('mongoose')
+var url = require('url')
+var router = express.Router()
+var passport = require('passport')
+var LocalStratey = require('passport-local').Strategy
+var generatePassword = require('generate-password')
+const formidable = require('formidable')
+var path = require('path')
+var fs = require('fs')
+var fsExtra = require('fs-extra')
+var judge;
+// var judge = require('./judge')
 
 var User = require('./models/user'),
     Problem = require('./models/problem'),
@@ -17,7 +18,7 @@ var User = require('./models/user'),
     Contest = require('./models/contest');
 
 passport.use(new LocalStratey((username, password, done) => {
-    User.getUserByUsername(username, function (err, user) {
+    User.getUserByUsername(username, function(err, user) {
         if (err) {
             throw err;
         }
@@ -26,7 +27,7 @@ passport.use(new LocalStratey((username, password, done) => {
                 message: 'Unknown User'
             });
         }
-        User.comparePassword(password, user.password, function (err, isMatch) {
+        User.comparePassword(password, user.password, function(err, isMatch) {
             if (err) throw err;
             if (isMatch) {
                 return done(null, user);
@@ -39,12 +40,12 @@ passport.use(new LocalStratey((username, password, done) => {
     })
 }));
 
-passport.serializeUser(function (user, done) {
+passport.serializeUser(function(user, done) {
     done(null, user.id);
 });
 
-passport.deserializeUser(function (id, done) {
-    User.getUserById(id, function (err, user) {
+passport.deserializeUser(function(id, done) {
+    User.getUserById(id, function(err, user) {
         done(err, user);
     });
 });
@@ -57,7 +58,7 @@ router.get('/login', (req, res) => {
     res.render('login');
 });
 
-router.post('/login', passport.authenticate('local'), function (req, res) {
+router.post('/login', passport.authenticate('local'), function(req, res) {
     var data = {
         username: req.user.username,
         name: req.user.name,
@@ -74,7 +75,7 @@ router.get('/createUser', (req, res) => {
     res.render('createUser');
 });
 
-router.post('/createUser', function (req, res) {
+router.post('/createUser', function(req, res) {
     let userConfig = {
         _id: req.body.username,
         username: req.body.username,
@@ -92,7 +93,7 @@ router.post('/createUser', function (req, res) {
         userConfig.userType = "user";
     }
     var newUser = new User(userConfig);
-    User.createUser(newUser, function (password, err) {
+    User.createUser(newUser, function(password, err) {
         if (err) {
             res.send(err);
         } else {
@@ -104,12 +105,12 @@ router.post('/createUser', function (req, res) {
     });
 });
 
-router.get('/changePassword', function (req, res) {
+router.get('/changePassword', function(req, res) {
     res.render('changepassword');
 });
 
 router.post('/changePassword', (req, res) => {
-    User.comparePassword(req.body.oldPassword, req.user.password, function (err, isMatch) {
+    User.comparePassword(req.body.oldPassword, req.user.password, function(err, isMatch) {
         let status = 433,
             message = "";
         if (err) {
@@ -256,7 +257,7 @@ router.post('/createProblem', (req, res) => {
         fs.mkdirSync(problemPath);
     }
     var inputPath, outputPath;
-    form.on('fileBegin', function (name, file) {
+    form.on('fileBegin', function(name, file) {
         if (!issueCreating) {
             var type;
             if (name[0] == 'i') {
@@ -268,7 +269,7 @@ router.post('/createProblem', (req, res) => {
             file.path = path.join(type, name);
         }
     });
-    form.on('field', function (name, value) {
+    form.on('field', function(name, value) {
         if (!issueCreating) {
             console.log(name + " " + value);
             if (name == "questionCode") {
@@ -303,13 +304,13 @@ router.post('/createProblem', (req, res) => {
             }
         }
     });
-    form.on(['error', 'aborted'], function () {
+    form.on(['error', 'aborted'], function() {
         fsExtra.removeSync(questionPath);
         res.send({
             status: 400
         })
     });
-    form.on('end', function () {
+    form.on('end', function() {
         if (!issueCreating) {
             //Save the problem
             Problem.createProblem(problemConfig, (err) => {
@@ -343,8 +344,8 @@ router.post('/updateProblem', isAdmin, (req, res) => {
     });
 });
 
-router.get('/logout', function (req, res) {
-    req.session.destroy(function (err) {
+router.get('/logout', function(req, res) {
+    req.session.destroy(function(err) {
         res.redirect('/');
     });
 });
@@ -365,18 +366,59 @@ router.get('/createContest', isAdmin, (req, res) => {
 
 router.post('/createContest', isAdmin, (req, res) => {
     console.log(req.body);
-    Contest.createContest({
-
-    }, function (err) {
-
+    var contestData = {
+        _id: req.body.contestUrl,
+        username: req.user.username,
+        contestname: req.body.contestName,
+        startdate: req.body.startdate,
+        enddate: req.body.enddate,
+        problems: req.body["problems[]"],
+        contesttype: req.body.contestType,
+        duration: req.body.contestDuration
+    };
+    Contest.createContest(contestData, function(err) {
+        if (err) {
+            res.send({
+                status: 400,
+                message: err
+            });
+        } else {
+            res.send({
+                status: 200,
+                message: "Contest created, redirecting to contest page"
+            })
+        }
     });
 });
 
-router.get('/contest', (req, res) => {
-    res.sendStatus(200);
+router.get('/contest/:contestId', (req, res) => {
+    Contest.getContestDetails(req.params.contestId, (err, data) => {
+        if (err) {
+            res.sendStatus(404);
+        } else {
+            var dataObject = JSON.parse(JSON.stringify(data));
+            var presentDate = new Date();
+            var startdate = (new Date(data.startdate));
+            var enddate = (new Date(data.enddate));
+            if (presentDate < startdate) {
+                console.log("not started");
+                dataObject["contestStatus"] = "notstarted"
+            } else if (presentDate > enddate) {
+                console.log("ended");
+                dataObject["contestStatus"]  = "ended"
+            } else {
+                console.log("running");
+                dataObject["contestStatus"]  = "running";
+            }
+            console.log(dataObject);
+            res.render('contest', {
+                dataObject
+            });
+        }
+    });
 });
 
-router.get('/user', function (req, res) {
+router.get('/user', function(req, res) {
     res.send(req.user);
 });
 
