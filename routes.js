@@ -230,6 +230,7 @@ router.get('/problem/:questionId', (req, res) => {
         } else {
             // TODO: add feature of problem visibility
             var problemPath = path.join(__dirname, 'problem', problemData._id);
+            // TODO: Make problem visible
             if (fs.existsSync(problemPath)) {
                 var description = fs.readFileSync(path.join(problemPath, "description.txt"));
                 res.render("problem", {
@@ -283,6 +284,7 @@ router.post('/createProblem', (req, res) => {
                     problemConfig["_id"] = value;
                     problemConfig["author"] = req.user.name;
                     problemConfig["username"] = req.user.username;
+                    problemConfig["visiblility"] = req.user.visiblility;
                     inputPath = path.join(problemPath, "input");
                     outputPath = path.join(problemPath, "output");
                     fs.mkdirSync(problemPath);
@@ -342,6 +344,10 @@ router.get('/logout', function (req, res) {
         res.redirect('/');
     });
 });
+
+router.get('/createContest',(req,res) => {
+    res.render('createContest');
+})
 
 router.get('/contest', (req, res) => {
     res.sendStatus(200);

@@ -17,6 +17,10 @@ var ProblemSchema = mongoose.Schema({
         type: String,
         required: true
     },
+    visible: {
+        type: Boolean,
+        required: true
+    }
 });
 
 var Problem = module.exports = mongoose.model('Problem', ProblemSchema);

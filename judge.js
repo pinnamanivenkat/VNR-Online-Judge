@@ -9,7 +9,7 @@ const {
     java
 } = require('compile-run');
 
-var queue = new bull('execute', 'redis://34.73.94.204:6379');
+var queue = new bull('execute', 'redis://34.73.70.38:6379');
 
 module.exports.execute = function (data) {
     queue.add(data);
@@ -39,8 +39,6 @@ function executeCode(executor, data, done) {
         let outputFile = path.join(outputPath, "output_"+(counter++));
         let input = fs.readFileSync(inputFile).toString();
         let output = fs.readFileSync(outputFile).toString();
-        console.log(input);
-        console.log(output);
         executor.runFile(data.submissionFile, {
             stdin: input,
             timeout: 1000
