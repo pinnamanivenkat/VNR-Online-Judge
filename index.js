@@ -1,52 +1,52 @@
-var express = require('express');
-var flash = require('connect-flash');
-var app = express();
-var expressWinston = require('express-winston');
-var winston = require('winston');
-var routes = require('./routes');
-var bodyParser = require('body-parser');
-var compression = require('compression');
-var mongoose = require('mongoose');
-var cookieParser = require('cookie-parser');
-var session = require('express-session');
-var passport = require('passport');
+const express = require('express');
+const flash = require('connect-flash');
+const app = express();
+// const expressWinston = require('express-winston');
+// const winston = require('winston');
+const routes = require('./routes');
+const bodyParser = require('body-parser');
+const compression = require('compression');
+const mongoose = require('mongoose');
+const cookieParser = require('cookie-parser');
+const session = require('express-session');
+const passport = require('passport');
 
-var url = "mongodb://localhost:27017/th";
-var db_url = process.env.DB_URL
+let url = 'mongodb://34.73.76.249:27017/th';
+const dbUrl = process.env.DB_URL;
 
-if(process.env.DB_URL) {
-    url = db_url
+if (process.env.DB_URL) {
+  url = dbUrl;
 }
 
 mongoose.connect(url, {
-    useNewUrlParser: true
+  useNewUrlParser: true,
 });
 
 mongoose.set('useCreateIndex', true);
 mongoose.set('useFindAndModify', false);
 
 app.use(bodyParser.urlencoded({
-    extended: false
+  extended: false,
 }));
 app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(session({
-    secret: 'TuringHutOnlineJudge',
-    saveUninitialized: true,
-    resave: true
+  secret: 'TuringHutOnlineJudge',
+  saveUninitialized: true,
+  resave: true,
 }));
 
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use(function (req, res, next) {
-    res.set('Cache-Control', 'no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0');
-    if(req.user) {
-        res.locals.name = req.user.name;
-        res.locals.rollno = req.user.username;
-    }
-    res.locals.login = req.isAuthenticated();
-    next();
+app.use(function(req, res, next) {
+  res.set('Cache-Control', 'no-cache, private, no-store, must-revalidate, max-stale=0, post-check=0, pre-check=0');
+  if (req.user) {
+    res.locals.name = req.user.name;
+    res.locals.rollno = req.user.username;
+  }
+  res.locals.login = req.isAuthenticated();
+  next();
 });
 
 
@@ -85,11 +85,11 @@ app.use(compression());
 // app.use(express.static('./public'));
 app.engine('html', require('ejs').renderFile);
 app.set('view engine', 'ejs');
-app.enable("jsonp callback");
+app.enable('jsonp callback');
 app.use(express.static('./public'));
-app.use(express.static("./node_modules"));
+app.use(express.static('./node_modules'));
 app.use(flash());
 
 app.listen(8080, () => {
-    console.log('server stated on port 8080')
+  console.log('server stated on port 8080');
 });
