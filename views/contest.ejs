@@ -30,10 +30,10 @@
                     <% for(var i=0;i<dataObject.problems.length;i++) { %>
                     <tr>
                         <td>
-                            <a href="<%= dataObject._id %>/problem/<%= dataObject.problems[i] %>"><%= dataObject.problems[i] %></a>
+                            <a href="<%= dataObject._id %>/problem/<%= dataObject.problems[i]._id %>"><%= dataObject.problems[i]._id %></a>
                         </td>
                         <td>
-                            <%= problems[i].difficultyLevel %>
+                            <%= dataObject.problems[i].difficultyLevel %>
                         </td>
                     </tr>
                     <% }%>
@@ -41,7 +41,9 @@
             </table>
         </div>
         <div class="col-4">
-            <p id="timer"></p>
+            <p>Contest Ends in</p>
+            <p id="timer">
+            </p>
         </div>
     </div>
     <% } else if (dataObject.contestStatus=="ended") { %>

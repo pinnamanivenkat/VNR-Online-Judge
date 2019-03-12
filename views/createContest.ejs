@@ -37,8 +37,8 @@
                     <label for="selectproblems">Select Problems</label>
                     <select class="form-control" id="selectproblems" multiple>
                         <% for(var i=0;i<problems.length;i++) { %>
-                        <option value="<%= problems[i]._id+" "+problems[i].difficultyLevel %>">
-                            <%= problems[i]._id+" "+problems[i].difficultyLevel %>
+                        <option value="<%= problems[i]._id %>">
+                            <%= problems[i]._id %>
                         </option>
                         <% }%>
                     </select>
@@ -71,19 +71,28 @@
         $(function() {
             $('#submit').on('click', function() {
                 var formData = {};
+                var problems = new Array();
+                $('#selectproblems').val().forEach(element => {
+                    <% problems.forEach(prob => { %>
+                        if(element == "<%= prob._id %>") {
+                            var elem = JSON.parse(JSON.stringify(<%- prob %>));
+                            problems.push(elem);
+                        }
+                    <% }) %>
+                });
                 formData.contestUrl = $('#contesturl').val();
                 formData.contestName = $('#contestname').val();
                 formData.startdate = $('#startdate').val();
                 formData.enddate = $('#enddate').val();
-                formData.problems = $('#selectproblems').val()
+                formData.problems = problems;
                 formData.contestType = $('#contesttype').val();
                 formData.contestDuration = $('#contestduration').val();
+                console.log(formData);
                 let url = "/createContest";
                 $.ajax({
                     url,
-                    method: "POST",
-                    dataType: 'json',
-                    data: formData,
+                    method: "PUT",
+                    data: JSON.stringify(formData),
                     success: function (data) {
                         console.log(data.message);
                         if (data.status == 200) {
