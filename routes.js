@@ -186,7 +186,17 @@ router.post('/submit/:questionId', isLoggedIn, (req, res) => {
     status: 'UEX',
     score: 0,
   };
+  createSubmission(req, res, submissionObject);
   console.log(submissionObject);
+});
+
+/**
+ * [createSubmission description]
+ * @param  {[type]} req              [description]
+ * @param  {[type]} res              [description]
+ * @param  {[type]} submissionObject [description]
+ */
+function createSubmission(req, res, submissionObject) {
   Submission.createSubmission(submissionObject, (err, data) => {
     console.log(data);
     if (err) {
@@ -219,16 +229,27 @@ router.post('/submit/:questionId', isLoggedIn, (req, res) => {
       });
     }
   });
-});
+}
 
 router.post('/submit/:contestId/:questionId', isLoggedIn, (req, res) => {
   const temp = contestStatus[req.params.contestId];
   if (temp == 'running') {
-    // TODO: create way to submit during contest
+    const submissionObject = {
+      username: req.user.username,
+      problemCode: req.body.questionId,
+      status: 'UEX',
+      score: 0,
+      contestCode: req.params.contestId,
+    };
+    createSubmission(req, res, submissionObject);
     console.log('submitted code during contest');
   } else {
     res.sendStatus(404);
   }
+});
+
+router.get('/leaderboard/:contestId', (req, res)=> {
+  // TODO: Get all submissions of contest and sort according to score of user
 });
 
 router.get('/viewsolution/:submissionCode', (req, res) => {
