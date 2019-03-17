@@ -11,7 +11,7 @@ const cookieParser = require('cookie-parser');
 const session = require('express-session');
 const passport = require('passport');
 
-let url = 'mongodb://34.73.76.249:27017/th';
+let url = 'mongodb://35.243.148.136:27017/th';
 const dbUrl = process.env.DB_URL;
 
 if (process.env.DB_URL) {

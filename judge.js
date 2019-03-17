@@ -11,7 +11,7 @@ const {
 
 var queue = new bull('execute', {
     redis: {
-        host: "34.73.76.249",
+        host: "35.243.148.136",
         port: "6379"
     }
 });
