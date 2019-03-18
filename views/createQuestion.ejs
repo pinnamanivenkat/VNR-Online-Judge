@@ -12,38 +12,43 @@
 </head>
 
 <body>
+<nav class="navbar navbar-expand-sm container-fluid bg-dark navbar-dark fixed-top">
+        <a class="navbar-brand" href="javascript:void(0)">Turing Hut</a>
+</nav>
 
     <section class="container">
         <form id="questionForm" method="POST" action="/createProblem" target="hidden-iframe" onsubmit="return false"
             enctype="multipart/form-data">
             <% if(method == "create") {%>
-            <p>Problem code: <input type="text" name="problemCode" placeholder="VNRON01" id="problemCode"></input></p>
+            <p>Problem code: <input type="text" name="problemCode" placeholder="VNRON01" id="problemCode" class="cshadow"></input></p>
             <% } %>
             <div class="row">
                 <div class="col-6">
-                    <select name="difficultyLevel" id="difficultyLevel">
+                    <select name="difficultyLevel" id="difficultyLevel" class="dropdown-content">
                         <option value="easy">Easy</option>
                         <option value="medium">Medium</option>
                         <option value="hard">Hard</option>
                     </select>
                 </div>
                 <div class="col-6">
-                    <select name="visiblility" id="visiblility">
+                    <select name="visiblility" id="visiblility" class="dropdown-content">
                         <option value="true">Visible</option>
                         <option value="false">Not Visible</option>
                     </select>
                 </div>
             </div>
+            <div class="shadow">
             <textarea id="editor" name="questionText"></textarea>
+            </div>
             <div id="testCaseHolder">
                 <div>
                     <h5>Test cases:</h5>
-                    <button id="createTestcase">Create testcase</button>
+                    <button type="createTestcase">Create testcase</button>
                 </div>
             </div>
         </form>
         <center>
-            <button id="submit">Submit</input>
+            <button type="submit">Submit</input>
         </center>
 
         <iframe name="hidden-iframe" style="display: none;"></iframe>
