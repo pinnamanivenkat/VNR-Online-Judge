@@ -1,6 +1,7 @@
 var bull = require('bull');
 var path = require('path');
 var fs = require('fs');
+var ContestScore = require('./models/contestScore');
 const {
     c,
     cpp,
@@ -33,7 +34,7 @@ queue.process((job, done) => {
 });
 
 function executeCode(executor, data, done) {
-    console.log(data.problemCode);
+    console.log(data);
     let problemPath = path.join(__dirname, "problem", data.problemCode);
     let inputPath = path.join(problemPath, "input");
     let outputPath = path.join(problemPath, "output");
@@ -44,6 +45,7 @@ function executeCode(executor, data, done) {
         let outputFile = path.join(outputPath, "output_"+(counter++));
         let input = fs.readFileSync(inputFile).toString();
         let output = fs.readFileSync(outputFile).toString();
+        score = 0;
         executor.runFile(data.submissionFile, {
             stdin: input,
             timeout: 1000
@@ -65,12 +67,18 @@ function executeCode(executor, data, done) {
                     if (result.stdout == output) {
                         executionResult.push({
                             status: "AC"
-                        })
+                        });
+                        score++;
                     }
                 }
                 console.log(result);
             }
             fs.writeFileSync(path.join(data.submissionPath, "status.json"), JSON.stringify(executionResult));
+            ContestScore.updateScore({
+                _id: data.contestCode,
+                problemCode: data.problemCode,
+                score
+            })
         });
         console.log(file);
     });

@@ -8,8 +8,7 @@ const formidable = require('formidable');
 const path = require('path');
 const fs = require('fs');
 const fsExtra = require('fs-extra');
-let judge;
-// var judge = require('./judge')
+var judge = require('./judge')
 
 const contestStatus = {};
 
@@ -17,6 +16,7 @@ const User = require('./models/user');
 const Problem = require('./models/problem');
 const Submission = require('./models/submission');
 const Contest = require('./models/contest');
+const ContestScore = require('./models/contestScore');
 
 passport.use(new LocalStratey((username, password, done) => {
   User.getUserByUsername(username, function(err, user) {
@@ -185,9 +185,9 @@ router.post('/submit/:questionId', isLoggedIn, (req, res) => {
     problemCode: req.body.problemCode,
     status: 'UEX',
     score: 0,
+    contestCode: "practice"
   };
   createSubmission(req, res, submissionObject);
-  console.log(submissionObject);
 });
 
 /**
@@ -197,6 +197,7 @@ router.post('/submit/:questionId', isLoggedIn, (req, res) => {
  * @param  {[type]} submissionObject [description]
  */
 function createSubmission(req, res, submissionObject) {
+  console.log(submissionObject);
   Submission.createSubmission(submissionObject, (err, data) => {
     console.log(data);
     if (err) {
@@ -221,6 +222,7 @@ function createSubmission(req, res, submissionObject) {
         submissionId: data._id,
         language: req.body.language,
         problemCode: req.body.problemCode,
+        contestCode: submissionObject.contestCode
       });
       // TODO: Create submission queue and insert submission
       res.send({
@@ -236,7 +238,7 @@ router.post('/submit/:contestId/:questionId', isLoggedIn, (req, res) => {
   if (temp == 'running') {
     const submissionObject = {
       username: req.user.username,
-      problemCode: req.body.questionId,
+      problemCode: req.params.questionId,
       status: 'UEX',
       score: 0,
       contestCode: req.params.contestId,
@@ -263,6 +265,7 @@ router.get('/problem/:questionId', (req, res) => {
     if (err) {
       res.send(404);
     } else {
+      // TODO: handle when problem Doesn't exist
       // TODO: add feature of problem visibility
       const problemPath = path.join(__dirname, 'problem', problemData._id);
       // TODO: Make problem visible
@@ -273,6 +276,7 @@ router.get('/problem/:questionId', (req, res) => {
           description,
           problemCode: req.params.questionId,
           duringContest: false,
+          contestCode: "practice"
         });
       } else {
         res.sendStatus(404);
@@ -392,7 +396,6 @@ router.get('/createContest', isAdmin, (req, res) => {
     if (!err) {
       problems = docs;
     }
-    console.log(problems);
     res.render('createContest', {
       problems,
     });
@@ -421,6 +424,10 @@ router.put('/createContest', isAdmin, (req, res) => {
         message: err,
       });
     } else {
+      ContestScore.createContest({
+        _id: req.body.contestUrl,
+        userScore: []
+      })
       res.send({
         status: 200,
         message: 'Contest created, redirecting to contest page',
