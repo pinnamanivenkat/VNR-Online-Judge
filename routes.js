@@ -220,6 +220,7 @@ function createSubmission(req, res, submissionObject) {
         submissionPath,
         submissionFile,
         submissionId: data._id,
+        username: submissionObject.username,
         language: req.body.language,
         problemCode: req.body.problemCode,
         contestCode: submissionObject.contestCode

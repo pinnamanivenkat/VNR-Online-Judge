@@ -76,9 +76,10 @@ function executeCode(executor, data, done) {
             fs.writeFileSync(path.join(data.submissionPath, "status.json"), JSON.stringify(executionResult));
             ContestScore.updateScore({
                 _id: data.contestCode,
+                username: data.username,
                 problemCode: data.problemCode,
                 score
-            })
+            });
         });
         console.log(file);
     });
