@@ -19,6 +19,7 @@ module.exports.createContest = function (contestData) {
 };
 
 module.exports.updateScore = function (userScore) {
+    console.log(userScore);
     ContestScore.findOne({
         "_id": userScore._id
     }, (err, res) => {
@@ -29,11 +30,19 @@ module.exports.updateScore = function (userScore) {
                 var dataObject = {
                     username: userScore.username
                 };
-                dataObject[userScore.problemCode] = userScore.score
+                dataObject[userScore.problemCode] = userScore.score;
+                res.userScore.push(dataObject);
+                res.save();
                 console.log(dataObject);
             } else {
-                // TODO: update score if user has already submitted, createScore if user hasn't submitted
-                console.log(res.userScore[userScore.problemCode]);
+                for(var i=0;i<res.userScore.length;i++) {
+                    if(res.userScore[i].username == userScore.username) {
+                        res.userScore[i][userScore.problemCode] = userScore.score;
+                        res.markModified("userScore");
+                        break;
+                    }
+                }
+                res.save();
             }
         }
     });

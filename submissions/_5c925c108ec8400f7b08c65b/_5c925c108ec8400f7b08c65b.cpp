@@ -20,5 +20,4 @@ int main() {
     } else {
         cout<<"-_-";
     }
-    return 0;
 }
