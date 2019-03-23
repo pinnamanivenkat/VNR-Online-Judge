@@ -78,7 +78,8 @@ function executeCode(executor, data, done) {
                 _id: data.contestCode,
                 username: data.username,
                 problemCode: data.problemCode,
-                score
+                score,
+                submissionTime: data.submissionTime
             });
         });
         console.log(file);

@@ -161,7 +161,7 @@ router.get('/myProblems', isAdmin, (req, res) => {
 router.get('/question', isAdmin, (req, res) => {
   if (req.query.problemCode) {
     Problem.getProblemData(req.query.problemCode, (err, problemData) => {
-      if (err || problemData.author != req.user.username) {
+      if (err || problemData.username != req.user.username) {
         res.status(400).json({
           'message': 'access denied',
         });
@@ -180,14 +180,35 @@ router.get('/question', isAdmin, (req, res) => {
 
 router.post('/submit/:questionId', isLoggedIn, (req, res) => {
   // TODO: submit only when problem is visible
+  var submissionTime = new Date();
   const submissionObject = {
     username: req.user.username,
     problemCode: req.body.problemCode,
     status: 'UEX',
     score: 0,
-    contestCode: "practice"
+    contestCode: "practice",
+    submissionTime
   };
   createSubmission(req, res, submissionObject);
+});
+
+router.post('/submit/:contestId/:questionId', isLoggedIn, (req, res) => {
+  const temp = contestStatus[req.params.contestId];
+  var submissionTime = new Date();
+  if (temp == 'running') {
+    const submissionObject = {
+      username: req.user.username,
+      problemCode: req.params.questionId,
+      status: 'UEX',
+      score: 0,
+      contestCode: req.params.contestId,
+      submissionTime
+    };
+    createSubmission(req, res, submissionObject);
+    console.log('submitted code during contest');
+  } else {
+    res.sendStatus(404);
+  }
 });
 
 /**
@@ -223,7 +244,8 @@ function createSubmission(req, res, submissionObject) {
         username: submissionObject.username,
         language: req.body.language,
         problemCode: req.body.problemCode,
-        contestCode: submissionObject.contestCode
+        contestCode: submissionObject.contestCode,
+        submissionTime: submissionObject.submissionTime
       });
       // TODO: Create submission queue and insert submission
       res.send({
@@ -233,23 +255,6 @@ function createSubmission(req, res, submissionObject) {
     }
   });
 }
-
-router.post('/submit/:contestId/:questionId', isLoggedIn, (req, res) => {
-  const temp = contestStatus[req.params.contestId];
-  if (temp == 'running') {
-    const submissionObject = {
-      username: req.user.username,
-      problemCode: req.params.questionId,
-      status: 'UEX',
-      score: 0,
-      contestCode: req.params.contestId,
-    };
-    createSubmission(req, res, submissionObject);
-    console.log('submitted code during contest');
-  } else {
-    res.sendStatus(404);
-  }
-});
 
 router.get('/leaderboard/:contestId', (req, res)=> {
   // TODO: Get all submissions of contest and sort according to score of user
@@ -491,6 +496,32 @@ router.get('/contest/:contestId/problem/:questionId', (req, res) => {
   }
 });
 
+router.get('/contest/ranks/:contestId',(req,res)=> {
+  ContestScore.getContestScores(req.params.contestId,(err,contestScore)=> {
+    if(err) {
+      res.sendStatus(400);
+    } else {
+      var userScores = [];
+      contestScore.userScore.forEach(element => {
+        let userScore = 0;
+        for(var key in element) {
+          if(key!="username" && key!="lastSubmission") {
+            userScore += element[key];
+          }
+        }
+        userScores.push({
+          username: element["username"],
+          score: userScore
+        });
+      });
+      userScores = sortByKey(userScores,'score');
+      res.render('ranks',{
+        userScores
+      })
+    }
+  });
+});
+
 router.get('/user', function(req, res) {
   res.send(req.user);
 });
@@ -524,6 +555,13 @@ function isLoggedIn(req, res, next) {
   }
   res.status(400).json({
     'message': 'access denied',
+  });
+}
+
+function sortByKey(array, key) {
+  return array.sort(function(a, b) {
+      var x = a[key]; var y = b[key];
+      return ((x < y) ? -1 : ((x > y) ? 1 : 0));
   });
 }
 
