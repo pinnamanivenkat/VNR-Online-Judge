@@ -19,7 +19,7 @@ const Contest = require('./models/contest');
 const ContestScore = require('./models/contestScore');
 
 passport.use(new LocalStratey((username, password, done) => {
-  User.getUserByUsername(username, function(err, user) {
+  User.getUserByUsername(username, function (err, user) {
     if (err) {
       throw err;
     }
@@ -28,7 +28,7 @@ passport.use(new LocalStratey((username, password, done) => {
         message: 'Unknown User',
       });
     }
-    User.comparePassword(password, user.password, function(err, isMatch) {
+    User.comparePassword(password, user.password, function (err, isMatch) {
       if (err) throw err;
       if (isMatch) {
         return done(null, user);
@@ -41,12 +41,12 @@ passport.use(new LocalStratey((username, password, done) => {
   });
 }));
 
-passport.serializeUser(function(user, done) {
+passport.serializeUser(function (user, done) {
   done(null, user.id);
 });
 
-passport.deserializeUser(function(id, done) {
-  User.getUserById(id, function(err, user) {
+passport.deserializeUser(function (id, done) {
+  User.getUserById(id, function (err, user) {
     done(err, user);
   });
 });
@@ -59,7 +59,7 @@ router.get('/login', (req, res) => {
   res.render('login');
 });
 
-router.post('/login', passport.authenticate('local'), function(req, res) {
+router.post('/login', passport.authenticate('local'), function (req, res) {
   const data = {
     username: req.user.username,
     name: req.user.name,
@@ -72,11 +72,11 @@ router.post('/login', passport.authenticate('local'), function(req, res) {
   res.send(data);
 });
 
-router.get('/createUser', (req, res) => {
+router.get('/createUser', isAdmin, (req, res) => {
   res.render('createUser');
 });
 
-router.post('/createUser', function(req, res) {
+router.post('/createUser', isAdmin, function (req, res) {
   const userConfig = {
     _id: req.body.username,
     username: req.body.username,
@@ -94,7 +94,7 @@ router.post('/createUser', function(req, res) {
     userConfig.userType = 'user';
   }
   const newUser = new User(userConfig);
-  User.createUser(newUser, function(password, err) {
+  User.createUser(newUser, function (password, err) {
     if (err) {
       res.send(err);
     } else {
@@ -106,43 +106,43 @@ router.post('/createUser', function(req, res) {
   });
 });
 
-router.get('/changePassword', function(req, res) {
+router.get('/changePassword', function (req, res) {
   res.render('changepassword');
 });
 
 router.post('/changePassword', (req, res) => {
   User.comparePassword(req.body.oldPassword, req.user.password,
-      function(err, isMatch) {
-        let status = 433;
-        let message = '';
-        if (err) {
-          message = 'Please login again';
-        } else if (isMatch) {
-          const username = req.user._id;
-          const password = req.body.newPassword;
-          status = 1881;
-          User.changePassword(username, password, (err, status) => {
-            if (err) {
-              status = 433;
-              message = 'Please login again';
-            } else {
-              status = 1881;
-            }
-            res.send({
-              status,
-              message,
-            });
-          });
-        } else {
-          message = 'Please enter correct password';
-        }
-        if (status == 433) {
+    function (err, isMatch) {
+      let status = 433;
+      let message = '';
+      if (err) {
+        message = 'Please login again';
+      } else if (isMatch) {
+        const username = req.user._id;
+        const password = req.body.newPassword;
+        status = 1881;
+        User.changePassword(username, password, (err, status) => {
+          if (err) {
+            status = 433;
+            message = 'Please login again';
+          } else {
+            status = 1881;
+          }
           res.send({
             status,
             message,
           });
-        }
-      });
+        });
+      } else {
+        message = 'Please enter correct password';
+      }
+      if (status == 433) {
+        res.send({
+          status,
+          message,
+        });
+      }
+    });
 });
 
 router.get('/adminPortal', isAdmin, (req, res) => {
@@ -256,7 +256,7 @@ function createSubmission(req, res, submissionObject) {
   });
 }
 
-router.get('/leaderboard/:contestId', (req, res)=> {
+router.get('/leaderboard/:contestId', (req, res) => {
   // TODO: Get all submissions of contest and sort according to score of user
 });
 
@@ -277,7 +277,7 @@ router.get('/problem/:questionId', (req, res) => {
       // TODO: Make problem visible
       if (fs.existsSync(problemPath)) {
         const description = fs.readFileSync(path.join(problemPath,
-            'description.txt'));
+          'description.txt'));
         res.render('problem', {
           description,
           problemCode: req.params.questionId,
@@ -303,7 +303,7 @@ router.post('/createProblem', (req, res) => {
   }
   let inputPath;
   let outputPath;
-  form.on('fileBegin', function(name, file) {
+  form.on('fileBegin', function (name, file) {
     if (!issueCreating) {
       let type;
       if (name[0] == 'i') {
@@ -315,7 +315,7 @@ router.post('/createProblem', (req, res) => {
       file.path = path.join(type, name);
     }
   });
-  form.on('field', function(name, value) {
+  form.on('field', function (name, value) {
     if (!issueCreating) {
       console.log(name + ' ' + value);
       if (name == 'questionCode') {
@@ -350,13 +350,13 @@ router.post('/createProblem', (req, res) => {
       }
     }
   });
-  form.on(['error', 'aborted'], function() {
+  form.on(['error', 'aborted'], function () {
     fsExtra.removeSync(questionPath);
     res.send({
       status: 400,
     });
   });
-  form.on('end', function() {
+  form.on('end', function () {
     if (!issueCreating) {
       // Save the problem
       Problem.createProblem(problemConfig, (err) => {
@@ -390,8 +390,8 @@ router.post('/updateProblem', isAdmin, (req, res) => {
   });
 });
 
-router.get('/logout', function(req, res) {
-  req.session.destroy(function(err) {
+router.get('/logout', function (req, res) {
+  req.session.destroy(function (err) {
     res.redirect('/');
   });
 });
@@ -423,7 +423,7 @@ router.put('/createContest', isAdmin, (req, res) => {
     contesttype: req.body.contestType,
     duration: req.body.contestDuration,
   };
-  Contest.createContest(contestData, function(err) {
+  Contest.createContest(contestData, function (err) {
     if (err) {
       res.send({
         status: 400,
@@ -479,7 +479,7 @@ router.get('/contest/:contestId/problem/:questionId', (req, res) => {
         const problemPath = path.join(__dirname, 'problem', problemData._id);
         if (fs.existsSync(problemPath)) {
           const description = fs.readFileSync(path.join(problemPath,
-              'description.txt'));
+            'description.txt'));
           res.render('problem', {
             description,
             problemCode: req.params.questionId,
@@ -496,16 +496,16 @@ router.get('/contest/:contestId/problem/:questionId', (req, res) => {
   }
 });
 
-router.get('/contest/ranks/:contestId',(req,res)=> {
-  ContestScore.getContestScores(req.params.contestId,(err,contestScore)=> {
-    if(err) {
+router.get('/contest/ranks/:contestId', (req, res) => {
+  ContestScore.getContestScores(req.params.contestId, (err, contestScore) => {
+    if (err) {
       res.sendStatus(400);
     } else {
       var userScores = [];
       contestScore.userScore.forEach(element => {
         let userScore = 0;
-        for(var key in element) {
-          if(key!="username" && key!="lastSubmission") {
+        for (var key in element) {
+          if (key != "username" && key != "lastSubmission") {
             userScore += element[key];
           }
         }
@@ -514,15 +514,15 @@ router.get('/contest/ranks/:contestId',(req,res)=> {
           score: userScore
         });
       });
-      userScores = sortByKey(userScores,'score');
-      res.render('ranks',{
+      userScores = sortByKey(userScores, 'score');
+      res.render('ranks', {
         userScores
       })
     }
   });
 });
 
-router.get('/user', function(req, res) {
+router.get('/user', function (req, res) {
   res.send(req.user);
 });
 
@@ -559,15 +559,15 @@ function isLoggedIn(req, res, next) {
 }
 
 function sortByKey(array, key) {
-  return array.sort(function(a, b) {
-      var x = a[key]; var y = b[key];
-      if(x>y) {
-        return 1;
-      } else if(x<y) {
-        return -1;
-      } else {
-        return 0;
-      }
+  return array.sort(function (a, b) {
+    var x = a[key]; var y = b[key];
+    if (x < y) {
+      return 1;
+    } else if (x > y) {
+      return -1;
+    } else {
+      return 0;
+    }
   });
 }
 
