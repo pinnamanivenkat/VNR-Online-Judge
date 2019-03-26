@@ -40,12 +40,12 @@ function executeCode(executor, data, done) {
     let outputPath = path.join(problemPath, "output");
     executionResult = [];
     var counter = 0;
+    score = 0;
     fs.readdirSync(inputPath).forEach(file => {
         let inputFile = path.join(inputPath, file);
         let outputFile = path.join(outputPath, "output_"+(counter++));
         let input = fs.readFileSync(inputFile).toString();
         let output = fs.readFileSync(outputFile).toString();
-        score = 0;
         executor.runFile(data.submissionFile, {
             stdin: input,
             timeout: 1000
@@ -69,18 +69,23 @@ function executeCode(executor, data, done) {
                             status: "AC"
                         });
                         score++;
+                    } else {
+                        executionResult.push({
+                            status: "WA"
+                        });
                     }
                 }
-                console.log(result);
             }
             fs.writeFileSync(path.join(data.submissionPath, "status.json"), JSON.stringify(executionResult));
-            ContestScore.updateScore({
-                _id: data.contestCode,
-                username: data.username,
-                problemCode: data.problemCode,
-                score,
-                submissionTime: data.submissionTime
-            });
+            if(data.contestCode == 'practice') {
+                ContestScore.updateScore({
+                    _id: data.contestCode,
+                    username: data.username,
+                    problemCode: data.problemCode,
+                    score,
+                    submissionTime: data.submissionTime
+                });
+            }
         });
         console.log(file);
     });
