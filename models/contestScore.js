@@ -34,6 +34,7 @@ module.exports.updateScore = function (userScore) {
         if (err) {
             console.log(err);
         } else {
+            console.log(res);
             if(res.userScore.length==0) {
                 var dataObject = {
                     username: userScore.username
@@ -42,7 +43,7 @@ module.exports.updateScore = function (userScore) {
                 dataObject.lastSubmission = userScore.submissionTime;
                 res.userScore.push(dataObject);
                 res.save();
-                console.log(dataObject);
+                console.log("pushing");
             } else {
                 for(var i=0;i<res.userScore.length;i++) {
                     if(res.userScore[i].username == userScore.username) {

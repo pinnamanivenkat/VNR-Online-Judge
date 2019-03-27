@@ -64,11 +64,7 @@ router.post('/login', passport.authenticate('local'), function (req, res) {
     username: req.user.username,
     name: req.user.name,
   };
-  if (req.user.userType == 'user') {
-    data.redirect = '/';
-  } else {
-    data.redirect = '/adminPortal';
-  }
+  data.redirect = '/';
   res.send(data);
 });
 
@@ -76,7 +72,7 @@ router.get('/createUser', isAdmin, (req, res) => {
   res.render('createUser');
 });
 
-router.post('/createUser', isAdmin, function (req, res) {
+router.post('/createUser', function (req, res) {
   const userConfig = {
     _id: req.body.username,
     username: req.body.username,

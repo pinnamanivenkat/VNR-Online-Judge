@@ -39,9 +39,10 @@ function executeCode(executor, data, done) {
     let inputPath = path.join(problemPath, "input");
     let outputPath = path.join(problemPath, "output");
     executionResult = [];
-    var counter = 0;
+    var counter = 0,testCase = 0;
     score = 0;
-    fs.readdirSync(inputPath).forEach(file => {
+    files = fs.readdirSync(inputPath)
+    files.forEach(file => {
         let inputFile = path.join(inputPath, file);
         let outputFile = path.join(outputPath, "output_"+(counter++));
         let input = fs.readFileSync(inputFile).toString();
@@ -50,6 +51,7 @@ function executeCode(executor, data, done) {
             stdin: input,
             timeout: 1000
         }, (err, result) => {
+            testCase++;
             if (err) {
                 console.log(err);
             } else {
@@ -77,14 +79,16 @@ function executeCode(executor, data, done) {
                 }
             }
             fs.writeFileSync(path.join(data.submissionPath, "status.json"), JSON.stringify(executionResult));
-            if(data.contestCode == 'practice') {
-                ContestScore.updateScore({
-                    _id: data.contestCode,
-                    username: data.username,
-                    problemCode: data.problemCode,
-                    score,
-                    submissionTime: data.submissionTime
-                });
+            if(testCase == files.length) {
+                if(data.contestCode != 'practice') {
+                    ContestScore.updateScore({
+                        _id: data.contestCode,
+                        username: data.username,
+                        problemCode: data.problemCode,
+                        score,
+                        submissionTime: data.submissionTime
+                    });
+                }
             }
         });
         console.log(file);

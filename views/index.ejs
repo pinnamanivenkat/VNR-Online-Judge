@@ -24,6 +24,11 @@
                 <a class="nav-link" href="#">Contests</a>
             </li>
             <% if(login) { %>
+                <% if(isAdmin) { %>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/adminPortal">AdminPortal</a>
+                    </li>
+                <% } %>
             <li class="nav-item dropdown">
                 <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#">
                     <%= name %><span class="caret"></span></a>

@@ -45,6 +45,11 @@ app.use(function(req, res, next) {
     res.locals.name = req.user.name;
     res.locals.rollno = req.user.username;
   }
+  if(req.user) {
+    res.locals.isAdmin = (req.user.userType=='admin');
+  } else {
+    res.locals.isAdmin = false;
+  }
   res.locals.login = req.isAuthenticated();
   next();
 });

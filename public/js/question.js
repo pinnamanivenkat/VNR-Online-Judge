@@ -17,8 +17,8 @@ $(() => {
         }
         var newTestCaseDiv = $(document.createElement("div")).attr("id", "testcase" + counter).attr("class", "row");
         newTestCaseDiv.appendTo("#testCaseHolder");
-        var inputFile = $(document.createElement("input")).attr("name", "input" + counter).attr("type", "file").attr("accept", ".txt").attr("class", "col-5");
-        var outputFile = $(document.createElement("input")).attr("name", "output" + counter).attr("type", "file").attr("accept", ".txt").attr("class", "col-5");
+        var inputFile = $(document.createElement("input")).attr("name", "input" + counter).attr("type", "file").attr("class", "col-5");
+        var outputFile = $(document.createElement("input")).attr("name", "output" + counter).attr("type", "file").attr("class", "col-5");
         var deleteButton = $(document.createElement("input")).attr("id", "delete" + counter).attr("type", "button").attr("value", "Delete").attr("class", "col-2");
         deleteButton.on("click", function () {
             newTestCaseDiv.remove();
