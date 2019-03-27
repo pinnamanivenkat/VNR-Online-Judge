@@ -1,3 +1,4 @@
+ 
 @import url('https://fonts.googleapis.com/css?family=Ubuntu');
 
 * {
@@ -36,17 +37,4 @@ button,input[type=button] {
     -ms-transition: all 0.3s ease-in-out;
     -o-transition: all 0.3s ease-in-out;
     transition: all 0.3s ease-in-out;
-}
-
-
-section {
-    margin: 20px;
-}
-
-div.container {
-    margin-top: 40px;
-}
-
-.table {
-    text-align: center;
 }
