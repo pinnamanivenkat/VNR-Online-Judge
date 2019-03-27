@@ -22,7 +22,7 @@
                         <th>Problem Code</th>
                         <th>Difficulty Level</th>
                         <th>Delete</th>
-                        <th>Edit</th>
+                        <!--<th>Edit</th>-->
                     </tr>
                 </thead>
                 <tbody>
@@ -35,11 +35,11 @@
                             <%= problems[i].difficultyLevel %>
                         </td>
                         <td>
-                            <a><i class="fa fa-trash" aria-hidden="true"></i></a>
+                            <a href="javascript:void(0);" onclick="deleteProblem('<%= problems[i]._id %>')"><i class="fa fa-trash" aria-hidden="true"></i></a>
                         </td>
-                        <td>
+                        <!--<td>
                             <a><i class="far fa-edit" aria-hidden="true"></i></a>
-                        </td>
+                        </td>-->
                     </tr>
                     <% }%>
                 </tbody>

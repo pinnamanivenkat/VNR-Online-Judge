@@ -54,3 +54,11 @@ module.exports.createProblem = function(dbData, callback) {
     }
   });
 };
+
+module.exports.deleteProblem = function(problemCode,callback) {
+  Problem.deleteOne({
+    _id:problemCode
+  },(err) => {
+    callback(err);
+  })
+}

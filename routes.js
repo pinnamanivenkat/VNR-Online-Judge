@@ -369,6 +369,44 @@ router.post('/createProblem', (req, res) => {
   });
 });
 
+router.post('/deleteProblem', isAdmin, (req, res) => {
+  Problem.getProblemData(req.body.problemCode, (err, docs) => {
+    console.log(docs);
+    if (err) {
+      res.send({
+        status: 400
+      });
+    } else {
+      if (docs.username == req.user.username) {
+        Problem.deleteProblem(req.body.problemCode, (err) => {
+          if (err) {
+            res.send({
+              status: 400
+            });
+          } else {
+            problemPath = path.join(__dirname,"problem",req.body.problemCode);
+            fsExtra.remove(problemPath,(err) => {
+              if(err) {
+                res.send({
+                  status: 400
+                });
+              } else {
+                res.send({
+                  status: 200
+                });
+              }
+            });
+          }
+        })
+      } else {
+        res.send({
+          status: 404
+        });
+      }
+    }
+  });
+});
+
 router.post('/updateProblem', isAdmin, (req, res) => {
   // TODO: update Problem
   Problem.getProblemData(req.body.problemCode, (err, problemData) => {
@@ -552,7 +590,8 @@ function isLoggedIn(req, res, next) {
 
 function sortByKey(array, key) {
   return array.sort(function (a, b) {
-    var x = a[key]; var y = b[key];
+    var x = a[key];
+    var y = b[key];
     if (x < y) {
       return 1;
     } else if (x > y) {
