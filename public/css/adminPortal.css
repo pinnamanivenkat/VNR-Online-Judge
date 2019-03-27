@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css?family=Ubuntu');
+ @import url('https://fonts.googleapis.com/css?family=Ubuntu');
 
 * {
 font-family: 'Ubuntu', sans-serif;
@@ -7,7 +7,6 @@ font-family: 'Ubuntu', sans-serif;
 body {
     margin-top: 120px;
 }
-
 .navbar {
     background: #04695C !important;
 }
@@ -16,7 +15,20 @@ body {
     color: white !important;
 }
 
+.dropdown-item {
+    background: white!important;
+}
 
+.dropdown-item.link:active {
+    background: #04695C!important;
+}
+.margin-class {
+    margin: 100px auto;
+    display: flex;
+    align-content: center;
+/*    justify-content: center;*/
+    justify-content: space-around;
+}
 button,input[type=button] {
     background-color: #04695C;
     border: none;
@@ -36,17 +48,4 @@ button,input[type=button] {
     -ms-transition: all 0.3s ease-in-out;
     -o-transition: all 0.3s ease-in-out;
     transition: all 0.3s ease-in-out;
-}
-
-
-section {
-    margin: 20px;
-}
-
-div.container {
-    margin-top: 40px;
-}
-
-.table {
-    text-align: center;
 }

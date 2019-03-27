@@ -6,7 +6,21 @@ body {
     font-family: "Poppins", sans-serif;
     height: 100vh;
 }
+.navbar {
+    background: #04695C !important;
+}
 
+.nav-link {
+    color: white !important;
+}
+
+.dropdown-item {
+    background: white!important;
+}
+
+.dropdown-item.link:active {
+    background: #04695C!important;
+}
 a {
     color: #04695C;
     display: inline-block;
