@@ -176,7 +176,7 @@ router.post('/submit/:questionId', isLoggedIn, (req, res) => {
   const submissionObject = {
     username: req.user.username,
     problemCode: req.body.problemCode,
-    status: 'UEX',
+    language: req.body.language,
     score: 0,
     contestCode: "practice",
     submissionTime
@@ -191,7 +191,7 @@ router.post('/submit/:contestId/:questionId', isLoggedIn, (req, res) => {
     const submissionObject = {
       username: req.user.username,
       problemCode: req.params.questionId,
-      status: 'UEX',
+      language: req.body.language,
       score: 0,
       contestCode: req.params.contestId,
       submissionTime
@@ -210,7 +210,6 @@ router.post('/submit/:contestId/:questionId', isLoggedIn, (req, res) => {
  * @param  {[type]} submissionObject [description]
  */
 function createSubmission(req, res, submissionObject) {
-  console.log(submissionObject);
   Submission.createSubmission(submissionObject, (err, data) => {
     console.log(data);
     if (err) {
@@ -239,7 +238,6 @@ function createSubmission(req, res, submissionObject) {
         contestCode: submissionObject.contestCode,
         submissionTime: submissionObject.submissionTime
       });
-      // TODO: Create submission queue and insert submission
       res.send({
         status: 200,
         submissionCode: data._id,
@@ -248,14 +246,50 @@ function createSubmission(req, res, submissionObject) {
   });
 }
 
-router.get('/leaderboard/:contestId', (req, res) => {
-  // TODO: Get all submissions of contest and sort according to score of user
+router.get(['/viewSolution/:submissionCode','/contest/:contestId/viewSolution/:submissionCode'], (req, res) => {
+  res.render('viewSolution');
 });
 
-router.get('/viewsolution/:submissionCode', (req, res) => {
-  res.render('viewSolution');
-  // TODO: Render submission page which should contain status,score,code
+router.post('/contest/:contestId/viewSolution/:submissionCode', (req, res) => {
+  getSubmissionDetails(req.params.contestId,req.params.submissionCode,res);
 });
+
+router.post('/viewSolution/:submissionCode', (req, res) => {
+  getSubmissionDetails('practice',req.params.submissionCode,res);
+});
+
+function getSubmissionDetails(contestId,submissionId,res) {
+  Submission.getSubmissionDetails(submissionId, (err, doc) => {
+    var status,code,submissionStatus;
+    if (err || !doc) {
+      status = 400;
+    } else {
+      if (doc.contestCode == contestId) {
+        status = 200;
+        var submissionCode = path.join(__dirname,"submission",submissionId,submissionId+'.'+doc.language);
+        var submissionStatusFile = path.join(__dirname,"submission",submissionId,'status.json');
+        if(fs.existsSync(submissionCode)) {
+          code = fs.readFileSync(submissionCode);
+          if(fs.existsSync(submissionStatusFile)) {
+            submissionStatus = fs.readFileSync(submissionStatusFile);
+            status = 200;
+          } else {
+            status = 320;
+          }
+        } else {
+          status = 320;
+        }
+      } else {
+        status = 400;
+      }
+    }
+    res.send({
+      status,
+      code,
+      submissionStatus
+    });
+  });
+}
 
 router.get('/problem/:questionId', (req, res) => {
   console.log(req.params.questionId);
@@ -384,9 +418,9 @@ router.post('/deleteProblem', isAdmin, (req, res) => {
               status: 400
             });
           } else {
-            problemPath = path.join(__dirname,"problem",req.body.problemCode);
-            fsExtra.remove(problemPath,(err) => {
-              if(err) {
+            problemPath = path.join(__dirname, "problem", req.body.problemCode);
+            fsExtra.remove(problemPath, (err) => {
+              if (err) {
                 res.send({
                   status: 400
                 });

@@ -9,7 +9,7 @@ const SubmissionSchema = mongoose.Schema({
     type: String,
     required: true,
   },
-  status: {
+  language: {
     type: String,
     required: true,
   },
@@ -35,3 +35,9 @@ module.exports.createSubmission = function(dbData, callback) {
     }
   });
 };
+
+module.exports.getSubmissionDetails = function(submissionId,callback) {
+  Submission.findById(submissionId,(err,doc) => {
+    callback(err,doc);
+  });
+}

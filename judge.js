@@ -78,8 +78,8 @@ function executeCode(executor, data, done) {
                     }
                 }
             }
-            fs.writeFileSync(path.join(data.submissionPath, "status.json"), JSON.stringify(executionResult));
             if(testCase == files.length) {
+                fs.writeFileSync(path.join(data.submissionPath, "status.json"), JSON.stringify(executionResult));
                 if(data.contestCode != 'practice') {
                     ContestScore.updateScore({
                         _id: data.contestCode,
