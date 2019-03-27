@@ -72,7 +72,7 @@ router.get('/createUser', isAdmin, (req, res) => {
   res.render('createUser');
 });
 
-router.post('/createUser', function (req, res) {
+router.post('/createUser', isAdmin, function (req, res) {
   const userConfig = {
     _id: req.body.username,
     username: req.body.username,
@@ -84,11 +84,7 @@ router.post('/createUser', function (req, res) {
     }),
     name: req.body.name,
   };
-  if (req.body.addUserType) {
-    userConfig.userType = 'admin';
-  } else {
-    userConfig.userType = 'user';
-  }
+  userConfig.userType = req.body.addUserType;
   const newUser = new User(userConfig);
   User.createUser(newUser, function (password, err) {
     if (err) {

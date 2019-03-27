@@ -1,6 +1,5 @@
 $(() => {
     var snackBar = $('#snackbar');
-    var nameRegex = /^[a-zA-Z ]{2,30}$/
     var rollNumRegex = /^[a-zA-Z0-9]{10}$/
 
     $('#createUserForm').submit(function (e) {
@@ -9,12 +8,8 @@ $(() => {
         var name = $('#name').val();
         var addUserType = $('input[name=addUserType]:checked').val();
         var rollNumCheck = username.match(rollNumRegex)
-        var nameCheck = name.match(nameRegex)
 
-        if(addUserType == "user")
-            addUserType = null
-
-        if (rollNumCheck && nameCheck) {
+        if (rollNumCheck) {
             $.ajax({
                 type: "POST",
                 url: "/createUser",
@@ -27,7 +22,7 @@ $(() => {
                     if (!data.created) {
                         handleError();
                     }
-                    showFeedbackSnackBar(data.password);
+                    alert(data.password);
                 },
                 error: handleError = function(xhr, status, error) {
                     showFeedbackSnackBar("Roll number already exists");
@@ -46,6 +41,6 @@ $(() => {
         snackBar.addClass("snackbar_show");
         setTimeout(function () {
             snackBar.removeClass("snackbar_show");
-        }, 30000);
+        }, 3000);
     }
 });
