@@ -266,8 +266,10 @@ function getSubmissionDetails(contestId,submissionId,res) {
     } else {
       if (doc.contestCode == contestId) {
         status = 200;
-        var submissionCode = path.join(__dirname,"submission",submissionId,submissionId+'.'+doc.language);
-        var submissionStatusFile = path.join(__dirname,"submission",submissionId,'status.json');
+        var submissionCode = path.join(__dirname,"submissions",'_'+submissionId,'_'+submissionId+'.'+doc.language);
+        var submissionStatusFile = path.join(__dirname,"submissions",'_'+submissionId,'status.json');
+        console.log(submissionCode);
+        console.log(submissionStatusFile);
         if(fs.existsSync(submissionCode)) {
           code = fs.readFileSync(submissionCode);
           if(fs.existsSync(submissionStatusFile)) {

@@ -64,7 +64,6 @@ function compileCpp(filePath, options) {
                     return [4 /*yield*/, execute_command_1.execute(compilationPath, [filePath, '-o', executablePath], { timeout: compileTimeout })];
                 case 1:
                     res = _a.sent();
-                    console.log('compile-file.js'+res);
                     if (res.exitCode !== 0) {
                         res.errorType = 'compile-time';
                         throw res;

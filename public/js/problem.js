@@ -23,7 +23,11 @@ $(() => {
       success: function(data) {
         alert('sample');
         if (data.status == 200) {
-          window.location = '/viewsolution/'+data.submissionCode;
+          if(duringContest) {
+            window.location = '/contest/'+contestCode+'/viewsolution/'+data.submissionCode;
+          } else {
+            window.location = '/viewsolution/'+data.submissionCode;
+          }
         } else {
           alert('Please login to submit');
         }

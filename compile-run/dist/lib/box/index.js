@@ -5,7 +5,6 @@ var sdtin_write_1 = require("../sdtin-write");
 var stream_to_string_1 = require("../stream-to-string");
 // When it receives a message about what command to execute it executes it and returns the result
 process.on('message', function (msg) {
-    console.log(msg);
     var initialCPUUsage = process.cpuUsage();
     var initialMemUsage = process.memoryUsage();
     var cp = child_process_1.spawn(msg.cmd, msg.arguments);
@@ -18,12 +17,6 @@ process.on('message', function (msg) {
     resultPromise.push((stream_to_string_1.streamDataToString(cp.stderr)));
     resultPromise.push(stream_to_string_1.streamDataToString(cp.stdout));
     var pr = Promise.all(resultPromise);
-    cp.stdout.on('data',data => {
-        console.log(data);
-    })
-    cp.stderr.on('data',data => {
-        console.log(data);
-    })
     cp.on('close', function (exitCode) {
         var memUsage = process.memoryUsage();
         pr

@@ -36,7 +36,6 @@ function execute(cmd) {
             arguments: arr
         });
         p.on('message', function (msg) {
-            console.log(msg);
             if (msg.status == 'success') {
                 res(msg.executionResult);
             }

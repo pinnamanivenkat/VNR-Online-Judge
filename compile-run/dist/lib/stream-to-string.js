@@ -49,7 +49,6 @@ function streamDataToString(stream) {
                             data_1 += chunk;
                         });
                         stream.on('end', function () {
-                            console.log(data_1);
                             res(data_1);
                         });
                     }

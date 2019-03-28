@@ -64,7 +64,8 @@ function executeCode(executor, data, done) {
                             status: "CTE"
                         });
                         var error = result.stderr;
-                        executionResult.message = error.replace('/home/venkat','');
+                        var regex = new RegExp(path.join(__dirname,'submissions'),'g');
+                        executionResult.message = error.replace(regex,'');
                     } else {
                         executionResult.status.push({
                             status: "RTE"
