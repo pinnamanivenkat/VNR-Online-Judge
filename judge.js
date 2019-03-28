@@ -8,7 +8,7 @@ const {
     node,
     python,
     java
-} = require('compile-run');
+} = require('./compile-run');
 
 var queue = new bull('execute', {
     redis: {
@@ -38,7 +38,10 @@ function executeCode(executor, data, done) {
     let problemPath = path.join(__dirname, "problem", data.problemCode);
     let inputPath = path.join(problemPath, "input");
     let outputPath = path.join(problemPath, "output");
-    executionResult = [];
+    executionResult = {
+        message : "",
+        status: []
+    };
     var counter = 0,testCase = 0;
     score = 0;
     files = fs.readdirSync(inputPath)
@@ -57,22 +60,24 @@ function executeCode(executor, data, done) {
             } else {
                 if (result.errorType) {
                     if (result.errorType == 'compile-time') {
-                        executionResult.push({
+                        executionResult.status.push({
                             status: "CTE"
                         });
+                        var error = result.stderr;
+                        executionResult.message = error.replace('/home/venkat','');
                     } else {
-                        executionResult.push({
+                        executionResult.status.push({
                             status: "RTE"
                         });
                     }
                 } else {
                     if (result.stdout == output) {
-                        executionResult.push({
+                        executionResult.status.push({
                             status: "AC"
                         });
                         score++;
                     } else {
-                        executionResult.push({
+                        executionResult.status.push({
                             status: "WA"
                         });
                     }

@@ -1,0 +1,101 @@
+{
+  "_args": [
+    [
+      "compile-run@^2.3.0",
+      "/home/venkat/Desktop/OnlineJudge"
+    ]
+  ],
+  "_from": "compile-run@>=2.3.0 <3.0.0",
+  "_hasShrinkwrap": false,
+  "_id": "compile-run@2.3.0",
+  "_inCache": true,
+  "_installable": true,
+  "_location": "/compile-run",
+  "_nodeVersion": "10.15.0",
+  "_npmOperationalInternal": {
+    "host": "s3://npm-registry-packages",
+    "tmp": "tmp/compile-run_2.3.0_1546595187483_0.3525313301768742"
+  },
+  "_npmUser": {
+    "email": "vibhor349a@rediffmail.com",
+    "name": "vibhor1997a"
+  },
+  "_npmVersion": "6.4.1",
+  "_phantomChildren": {},
+  "_requested": {
+    "name": "compile-run",
+    "raw": "compile-run@^2.3.0",
+    "rawSpec": "^2.3.0",
+    "scope": null,
+    "spec": ">=2.3.0 <3.0.0",
+    "type": "range"
+  },
+  "_requiredBy": [
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/compile-run/-/compile-run-2.3.0.tgz",
+  "_shasum": "aef9adc9a7a7ce1953ed89fd4ed6f1d19d868d22",
+  "_shrinkwrap": null,
+  "_spec": "compile-run@^2.3.0",
+  "_where": "/home/venkat/Desktop/OnlineJudge",
+  "author": {
+    "email": "vibhor349a@rediffmail.com",
+    "name": "vibhor agrawal"
+  },
+  "bugs": {
+    "url": "https://github.com/l-ide/compile-run/issues"
+  },
+  "dependencies": {},
+  "description": "You can execute programs in diff languages using this package",
+  "devDependencies": {
+    "@types/node": "^10.12.15",
+    "typescript": "^3.2.2"
+  },
+  "directories": {},
+  "dist": {
+    "fileCount": 124,
+    "integrity": "sha512-5UugTceHBCjugHP6UoYXl93DTkfY28reEHKak/AYcai8LqChUmN+Lr5UoPPGrQMnKS6iWBtXPLSFBmJ1DT+Hcw==",
+    "npm-signature": "-----BEGIN PGP SIGNATURE-----\r\nVersion: OpenPGP.js v3.0.4\r\nComment: https://openpgpjs.org\r\n\r\nwsFcBAEBCAAQBQJcLyt0CRA9TVsSAnZWagAA3+IP+QCJkAr5b33UqmDKXLY0\nazs5XaLDWOMzWliDslZezKda3ez1tgkaKuDHnouTQTnr6GRs0dfafbPJ3+YE\ne6roVzcxEVfju8UEWibMhM83b7F6Y50U8mwT6FAC1cJXE2VX6qz/fiSPKg7T\n8JIP8X2YST7GtuumokRhyW9Kxj3C7j1RM7p3uLe7q5hk7faJfhqP5WmqoAX6\nsGRyjV48efgNITV8Zer56kOLCqY4tzHZqUIwoDe36ntzfMwX8rUMqyVKnL8e\n+PXK+8ZefrqQ98zK7uclXvHUyJthVWEgXuZG/5CFx+BgnZBIxitDMg0xzFw4\nBMOygIMXCEBBnxb13ZL0qOM2AnqF+8kRCBCiUmBHqtPf2G30O/KwY4fKeA/H\nDXOhsY0eVFin1+qaYMIG/i3OqEFPVz1TCTxVOcX6seVC+5BbwNjMxhX65kY2\n1Mf///5gixA4r5rtUX5mN6wo3o6a9bNJKR6HvqiGSC/1KsOYKwHaRDwbSs47\nh/qGva+vqQKmaJovpxx9uwUnCZlStYCyJQuTbVCT0NDlksweajPP/OriKLIA\nBhvk3ROrBdStFNBck7nWnx8BjUrKGn65DVKXuKOpaninBJnaRVy0hI/E0nHt\n7wC79eql44zd6jWNkXY7v8aIYwSwLcc53PT4P64w8o4Jd8Ktreq0xoVHthAz\n6aFm\r\n=bjV0\r\n-----END PGP SIGNATURE-----\r\n",
+    "shasum": "aef9adc9a7a7ce1953ed89fd4ed6f1d19d868d22",
+    "tarball": "https://registry.npmjs.org/compile-run/-/compile-run-2.3.0.tgz",
+    "unpackedSize": 142972
+  },
+  "gitHead": "a3407487d0045343177a95084011356be43ef5c5",
+  "homepage": "https://github.com/l-ide/compile-run#readme",
+  "keywords": [
+    "c",
+    "c++",
+    "compile",
+    "compile-run",
+    "cpp",
+    "execute",
+    "gcc",
+    "java",
+    "node",
+    "nodejs",
+    "python",
+    "run"
+  ],
+  "license": "MIT",
+  "main": "dist/index.js",
+  "maintainers": [
+    {
+      "name": "vibhor1997a",
+      "email": "vibhor349a@rediffmail.com"
+    }
+  ],
+  "name": "compile-run",
+  "optionalDependencies": {},
+  "readme": "ERROR: No README data found!",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/l-ide/compile-run.git"
+  },
+  "scripts": {
+    "build": "npm run tsc --",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "tsc": "tsc"
+  },
+  "types": "dist/index.d.ts",
+  "version": "2.3.0"
+}

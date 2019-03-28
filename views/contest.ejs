@@ -7,6 +7,8 @@
     <title>VNR Online Judge</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">
+    <link rel="stylesheet" href="/css/question.css"> 
+    <link rel="stylesheet" href="/css/contest.css"> 
     <script>
         var contestStatus = "<%= dataObject.contestStatus %>";
         console.log(contestStatus);
@@ -14,7 +16,7 @@
 </head>
 
 <body>
-        <nav class="navbar navbar-expand-sm container-fluid bg-dark navbar-dark fixed-top">
+    <nav class="navbar navbar-expand-sm container-fluid bg-dark navbar-dark fixed-top">
         <a class="navbar-brand" href="javascript:void(0)">Turing Hut</a>
 
         <ul class="nav navbar-nav ml-auto">
@@ -26,42 +28,52 @@
             </li>
         </ul>
     </nav>
-    <% if(dataObject.contestStatus=="running") { %>
-    <div class="row">
-        <div class="col-8">
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>Problem Code</th>
-                        <th>Difficulty</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% for(var i=0;i<dataObject.problems.length;i++) { %>
-                    <tr>
-                        <td>
-                            <a href="<%= dataObject._id %>/problem/<%= dataObject.problems[i]._id %>"><%= dataObject.problems[i]._id %></a>
-                        </td>
-                        <td>
-                            <%= dataObject.problems[i].difficultyLevel %>
-                        </td>
-                    </tr>
-                    <% }%>
-                </tbody>
-            </table>
+    <div class="margin-class container">
+        <div class="row">
+            <div class="col-8"></div>
+            <div class="col-4">
+                <a href="/contest/ranks/<%= dataObject._id %>">
+                    <button>Contest Ranks</button>
+                </a>
+            </div>
         </div>
-        <div class="col-4">
-            <p>Contest Ends in</p>
-            <p id="running">
+        <% if(dataObject.contestStatus=="running") { %>
+        <div class="row">
+            <div class="col-8">
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Problem Code</th>
+                            <th>Difficulty</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% for(var i=0;i<dataObject.problems.length;i++) { %>
+                        <tr>
+                            <td>
+                                <a href="<%= dataObject._id %>/problem/<%= dataObject.problems[i]._id %>"><%= dataObject.problems[i]._id %></a>
+                            </td>
+                            <td>
+                                <%= dataObject.problems[i].difficultyLevel %>
+                            </td>
+                        </tr>
+                        <% }%>
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-4">
+                <p>Contest Ends in</p>
+                <p id="running">
 
-            </p>
+                </p>
+            </div>
         </div>
+        <% } else if (dataObject.contestStatus=="ended") { %>
+        <p>Ended</p>
+        <% } else { %>
+        <p>Didn't start yets</p>
+        <% } %>
     </div>
-    <% } else if (dataObject.contestStatus=="ended") { %>
-    <p>Ended</p>
-    <% } else { %>
-    <p>Not Running</p>
-    <% } %>
 
     <script type="text/javascript">
         var startdate = new Date("<%= dataObject.startdate %>").getTime();
