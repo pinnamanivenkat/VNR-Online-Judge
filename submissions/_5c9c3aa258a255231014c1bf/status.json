@@ -1,1 +1,0 @@
-{"message":"/_5c9c3aa258a255231014c1bf/_5c9c3aa258a255231014c1bf.cpp: In function ‘int main()’:\n/_5c9c3aa258a255231014c1bf/_5c9c3aa258a255231014c1bf.cpp:54:5: error: expected ‘;’ before ‘for’\n     for(auto i:sum_arr) {\n     ^~~\n","status":[{"status":"CTE"},{"status":"CTE"},{"status":"CTE"}]}

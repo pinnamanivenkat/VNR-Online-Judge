@@ -50,7 +50,7 @@ int main() {
         }
     }
     cout<<sector<<endl;
-    sort(sum_arr.begin(),sum_arr.end())
+    sort(sum_arr.begin(),sum_arr.end());
     for(auto i:sum_arr) {
         cout<<i<<" ";
     }

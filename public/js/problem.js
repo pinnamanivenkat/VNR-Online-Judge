@@ -21,7 +21,6 @@ $(() => {
         problemCode,
       },
       success: function(data) {
-        alert('sample');
         if (data.status == 200) {
           if(duringContest) {
             window.location = '/contest/'+contestCode+'/viewsolution/'+data.submissionCode;

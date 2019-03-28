@@ -23,10 +23,10 @@ const SubmissionSchema = mongoose.Schema({
 });
 
 const Submission = module.exports = mongoose
-    .model('Submission', SubmissionSchema);
+  .model('Submission', SubmissionSchema);
 
-module.exports.createSubmission = function(dbData, callback) {
-  Submission.create(dbData, function(err, data) {
+module.exports.createSubmission = function (dbData, callback) {
+  Submission.create(dbData, function (err, data) {
     if (err) {
       console.log(err);
       callback(err);
@@ -36,8 +36,16 @@ module.exports.createSubmission = function(dbData, callback) {
   });
 };
 
-module.exports.getSubmissionDetails = function(submissionId,callback) {
-  Submission.findById(submissionId,(err,doc) => {
-    callback(err,doc);
+module.exports.getSubmissionDetails = function (submissionId, callback) {
+  Submission.findById(submissionId, (err, doc) => {
+    callback(err, doc);
+  });
+}
+
+module.exports.getContestSubmissions = function (contestId, callback) {
+  Submission.find({
+    contestCode: contestId
+  }, (err, data) => {
+    callback(err, data);
   });
 }

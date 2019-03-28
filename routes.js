@@ -8,7 +8,9 @@ const formidable = require('formidable');
 const path = require('path');
 const fs = require('fs');
 const fsExtra = require('fs-extra');
-var judge = require('./judge')
+var judge = require('./judge');
+var os = require('os');
+var childProcess = require('child_process');
 
 const contestStatus = {};
 
@@ -17,6 +19,10 @@ const Problem = require('./models/problem');
 const Submission = require('./models/submission');
 const Contest = require('./models/contest');
 const ContestScore = require('./models/contestScore');
+const PlagiarismResults = require('./models/plagiarismResults');
+
+var homeDir = os.homedir();
+var plagiarismPath = path.join(homeDir, '.plagiarism');
 
 passport.use(new LocalStratey((username, password, done) => {
   User.getUserByUsername(username, function (err, user) {
@@ -143,7 +149,6 @@ router.get('/adminPortal', isAdmin, (req, res) => {
 
 router.get('/myProblems', isAdmin, (req, res) => {
   Problem.getProblemsByUsername(req.user.username, (err, docs) => {
-    console.log(docs);
     res.render('myproblems', {
       problems: docs,
     });
@@ -205,7 +210,6 @@ router.post('/submit/:contestId/:questionId', isLoggedIn, (req, res) => {
       submissionTime
     };
     createSubmission(req, res, submissionObject);
-    console.log('submitted code during contest');
   } else {
     res.sendStatus(404);
   }
@@ -219,9 +223,7 @@ router.post('/submit/:contestId/:questionId', isLoggedIn, (req, res) => {
  */
 function createSubmission(req, res, submissionObject) {
   Submission.createSubmission(submissionObject, (err, data) => {
-    console.log(data);
     if (err) {
-      console.log(err);
       res.send({
         status: 400,
       });
@@ -276,12 +278,10 @@ function getSubmissionDetails(contestId, submissionId, res) {
         status = 200;
         var submissionCode = path.join(__dirname, "submissions", '_' + submissionId, '_' + submissionId + '.' + doc.language);
         var submissionStatusFile = path.join(__dirname, "submissions", '_' + submissionId, 'status.json');
-        console.log(submissionCode);
-        console.log(submissionStatusFile);
         if (fs.existsSync(submissionCode)) {
-          code = fs.readFileSync(submissionCode);
+          code = String(fs.readFileSync(submissionCode));
           if (fs.existsSync(submissionStatusFile)) {
-            submissionStatus = fs.readFileSync(submissionStatusFile);
+            submissionStatus = JSON.parse(String(fs.readFileSync(submissionStatusFile)));
             status = 200;
           } else {
             status = 320;
@@ -302,7 +302,6 @@ function getSubmissionDetails(contestId, submissionId, res) {
 }
 
 router.get('/problem/:questionId', (req, res) => {
-  console.log(req.params.questionId);
   Problem.getProblemData(req.params.questionId, (err, problemData) => {
     if (err) {
       res.send(404);
@@ -347,19 +346,15 @@ router.post('/createProblem', (req, res) => {
       } else {
         type = outputPath;
       }
-      console.log(type + ' ' + name);
       file.path = path.join(type, name);
     }
   });
   form.on('field', function (name, value) {
     if (!issueCreating) {
-      console.log(name + ' ' + value);
       if (name == 'questionCode') {
         problemPath = path.join(problemPath, value);
-        questionPath = problemPath;
-        console.log(problemPath);
+        questionPath = problemPath;         
         if (fs.existsSync(problemPath)) {
-          console.log('sample');
           res.send({
             status: 400,
             message: 'Problem with same code exist',
@@ -382,7 +377,6 @@ router.post('/createProblem', (req, res) => {
         problemConfig['difficultyLevel'] = value;
       } else if (name == 'visiblility') {
         problemConfig['visible'] = (value == 'true');
-        console.log(name + ' ' + value);
       }
     }
   });
@@ -396,7 +390,6 @@ router.post('/createProblem', (req, res) => {
     if (!issueCreating) {
       // Save the problem
       Problem.createProblem(problemConfig, (err) => {
-        console.log(err);
         if (err) {
           fsExtra.removeSync(questionPath);
           res.send({
@@ -415,7 +408,6 @@ router.post('/createProblem', (req, res) => {
 
 router.post('/deleteProblem', isAdmin, (req, res) => {
   Problem.getProblemData(req.body.problemCode, (err, docs) => {
-    console.log(docs);
     if (err) {
       res.send({
         status: 400
@@ -519,7 +511,7 @@ router.put('/createContest', isAdmin, (req, res) => {
 router.get('/contests', (req, res) => {
   Contest.getAllContests((err, docs) => {
     var contests = getContestDetails(docs);
-    res.render('contests',{
+    res.render('contests', {
       contests
     });
   });
@@ -528,7 +520,7 @@ router.get('/contests', (req, res) => {
 router.get('/myContests', isAdmin, (req, res) => {
   Contest.getMyContests(req.user.username, (err, docs) => {
     var contests = getContestDetails(docs);
-    res.render('contests',{
+    res.render('contests', {
       contests
     });
   })
@@ -536,12 +528,12 @@ router.get('/myContests', isAdmin, (req, res) => {
 
 function getContestDetails(docs) {
   var contests = [];
-  docs.forEach(doc=> {
-    doc.contestStatus = getContestStatus(doc.startdate,doc.enddate);
-    if(doc.contesttype == 'fixedtime') {
-      doc.contestDuration = Math.abs(doc.startdate.getTime() - doc.enddate.getTime()) / 3600000+' hrs';
+  docs.forEach(doc => {
+    doc.contestStatus = getContestStatus(doc.startdate, doc.enddate);
+    if (doc.contesttype == 'fixedtime') {
+      doc.contestDuration = Math.abs(doc.startdate.getTime() - doc.enddate.getTime()) / 3600000 + ' hrs';
     } else {
-      doc.contestDuration = doc.contestDuration+' hrs';
+      doc.contestDuration = doc.contestDuration + ' hrs';
     }
     contests.push(doc);
   });
@@ -554,9 +546,8 @@ router.get('/contest/:contestId', (req, res) => {
       res.sendStatus(404);
     } else {
       const dataObject = JSON.parse(JSON.stringify(data));
-      dataObject['contestStatus'] = getContestStatus(data.startdate,data.enddate);
+      dataObject['contestStatus'] = getContestStatus(data.startdate, data.enddate);
       contestStatus[data._id] = dataObject['contestStatus'];
-      console.log(dataObject);
       res.render('contest', {
         dataObject,
       });
@@ -564,7 +555,7 @@ router.get('/contest/:contestId', (req, res) => {
   });
 });
 
-function getContestStatus(start,end) {
+function getContestStatus(start, end) {
   const presentDate = new Date();
   const startdate = (new Date(start));
   const enddate = (new Date(end));
@@ -624,6 +615,41 @@ router.get('/contest/ranks/:contestId', (req, res) => {
       userScores = sortByKey(userScores, 'score');
       res.render('ranks', {
         userScores
+      })
+    }
+  });
+});
+
+router.get('/runPlagiarizer/:contestId', isAdmin,(req, res) => {
+  Submission.getContestSubmissions(req.params.contestId, (err, data) => {
+    if (err || !data) {
+      res.send({
+        status: 404
+      });
+    } else {
+      var contestPlagiarism = path.join(plagiarismPath, req.params.contestId);
+      data.forEach(submissionObject => {
+        var newPath = path.join(contestPlagiarism, submissionObject.username + '_' + submissionObject._id);
+        if(!fs.existsSync(newPath)) {
+          fsExtra.mkdirp(newPath);
+        }
+        var submissionPath = path.join(__dirname, 'submissions', '_' + submissionObject._id, '_' + submissionObject._id + '.' + submissionObject.language);
+        fs.copyFileSync(submissionPath, newPath);
+      });
+      var pc = childProcess.spawn('./moss -l cc ' + newPath + "/*");
+      pc.stderr.on('data', (data) => {
+         
+        pc.kill();
+      });
+      pc.stdout.on('data', (data) => {
+        PlagiarismResults.insertPlagiarismResult({
+          _id: req.params.contestId,
+          resultsUrl: data,
+          username: req.user.username
+        });
+        pc.kill();
+      });
+      pc.on('close', (code, signal) => {
       })
     }
   });

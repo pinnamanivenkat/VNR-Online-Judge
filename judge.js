@@ -34,7 +34,6 @@ queue.process((job, done) => {
 });
 
 function executeCode(executor, data, done) {
-    console.log(data);
     let problemPath = path.join(__dirname, "problem", data.problemCode);
     let inputPath = path.join(problemPath, "input");
     let outputPath = path.join(problemPath, "output");
@@ -97,7 +96,6 @@ function executeCode(executor, data, done) {
                 }
             }
         });
-        console.log(file);
     });
     done();
 }
