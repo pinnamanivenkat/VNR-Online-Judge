@@ -518,15 +518,35 @@ router.put('/createContest', isAdmin, (req, res) => {
 
 router.get('/contests', (req, res) => {
   Contest.getAllContests((err, docs) => {
-    //TODO: Display all contests
-  })
+    var contests = getContestDetails(docs);
+    res.render('contests',{
+      contests
+    });
+  });
 });
 
 router.get('/myContests', isAdmin, (req, res) => {
   Contest.getMyContests(req.user.username, (err, docs) => {
-    //TODO: Display My contests
+    var contests = getContestDetails(docs);
+    res.render('contests',{
+      contests
+    });
   })
-})
+});
+
+function getContestDetails(docs) {
+  var contests = [];
+  docs.forEach(doc=> {
+    doc.contestStatus = getContestStatus(doc.startdate,doc.enddate);
+    if(doc.contesttype == 'fixedtime') {
+      doc.contestDuration = Math.abs(doc.startdate.getTime() - doc.enddate.getTime()) / 3600000+' hrs';
+    } else {
+      doc.contestDuration = doc.contestDuration+' hrs';
+    }
+    contests.push(doc);
+  });
+  return contests;
+}
 
 router.get('/contest/:contestId', (req, res) => {
   Contest.getContestDetails(req.params.contestId, (err, data) => {
@@ -534,19 +554,7 @@ router.get('/contest/:contestId', (req, res) => {
       res.sendStatus(404);
     } else {
       const dataObject = JSON.parse(JSON.stringify(data));
-      const presentDate = new Date();
-      const startdate = (new Date(data.startdate));
-      const enddate = (new Date(data.enddate));
-      if (presentDate < startdate) {
-        console.log('not started');
-        dataObject['contestStatus'] = 'notstarted';
-      } else if (presentDate > enddate) {
-        console.log('ended');
-        dataObject['contestStatus'] = 'ended';
-      } else {
-        console.log('running');
-        dataObject['contestStatus'] = 'running';
-      }
+      dataObject['contestStatus'] = getContestStatus(data.startdate,data.enddate);
       contestStatus[data._id] = dataObject['contestStatus'];
       console.log(dataObject);
       res.render('contest', {
@@ -555,6 +563,19 @@ router.get('/contest/:contestId', (req, res) => {
     }
   });
 });
+
+function getContestStatus(start,end) {
+  const presentDate = new Date();
+  const startdate = (new Date(start));
+  const enddate = (new Date(end));
+  if (presentDate < startdate) {
+    return 'notstarted'
+  } else if (presentDate > enddate) {
+    return 'ended';
+  } else {
+    return 'running';
+  }
+}
 
 router.get('/contest/:contestId/problem/:questionId', (req, res) => {
   if (contestStatus[req.params.contestId] != 'notstarted') {
