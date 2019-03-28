@@ -37,16 +37,30 @@ const ContestSchema = mongoose.Schema({
 
 const Contest = module.exports = mongoose.model('Contest', ContestSchema);
 
-module.exports.createContest = function(contestData, callback) {
-  Contest.create(contestData, (err, docs)=>{
+module.exports.createContest = function (contestData, callback) {
+  Contest.create(contestData, (err, docs) => {
     callback(err);
   });
 };
 
-module.exports.getContestDetails = function(contestId, callback) {
+module.exports.getContestDetails = function (contestId, callback) {
   Contest.findOne({
     _id: contestId,
-  }, function(error, docs) {
+  }, function (error, docs) {
     callback(error, docs);
   });
 };
+
+module.exports.getMyContests = function (username, callback) {
+  Contest.find({
+    username
+  }, (err, docs) => {
+    callback(err, docs);
+  })
+}
+
+module.exports.getAllContests = function (callback) {
+  Contest.find({}, (err, docs) => {
+    callback(err, docs);
+  })
+}

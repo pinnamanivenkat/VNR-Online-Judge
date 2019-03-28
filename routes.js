@@ -150,9 +150,9 @@ router.get('/myProblems', isAdmin, (req, res) => {
   });
 });
 
-router.get('/problems',(req,res)=> {
-  Problem.getAllProblems((docs)=> {
-    res.render('viewProblems',{
+router.get('/problems', (req, res) => {
+  Problem.getAllProblems((docs) => {
+    res.render('viewProblems', {
       problems: docs
     });
   });
@@ -254,33 +254,33 @@ function createSubmission(req, res, submissionObject) {
   });
 }
 
-router.get(['/viewSolution/:submissionCode','/contest/:contestId/viewSolution/:submissionCode'], (req, res) => {
+router.get(['/viewSolution/:submissionCode', '/contest/:contestId/viewSolution/:submissionCode'], (req, res) => {
   res.render('viewSolution');
 });
 
 router.post('/contest/:contestId/viewSolution/:submissionCode', (req, res) => {
-  getSubmissionDetails(req.params.contestId,req.params.submissionCode,res);
+  getSubmissionDetails(req.params.contestId, req.params.submissionCode, res);
 });
 
 router.post('/viewSolution/:submissionCode', (req, res) => {
-  getSubmissionDetails('practice',req.params.submissionCode,res);
+  getSubmissionDetails('practice', req.params.submissionCode, res);
 });
 
-function getSubmissionDetails(contestId,submissionId,res) {
+function getSubmissionDetails(contestId, submissionId, res) {
   Submission.getSubmissionDetails(submissionId, (err, doc) => {
-    var status,code,submissionStatus;
+    var status, code, submissionStatus;
     if (err || !doc) {
       status = 400;
     } else {
       if (doc.contestCode == contestId) {
         status = 200;
-        var submissionCode = path.join(__dirname,"submissions",'_'+submissionId,'_'+submissionId+'.'+doc.language);
-        var submissionStatusFile = path.join(__dirname,"submissions",'_'+submissionId,'status.json');
+        var submissionCode = path.join(__dirname, "submissions", '_' + submissionId, '_' + submissionId + '.' + doc.language);
+        var submissionStatusFile = path.join(__dirname, "submissions", '_' + submissionId, 'status.json');
         console.log(submissionCode);
         console.log(submissionStatusFile);
-        if(fs.existsSync(submissionCode)) {
+        if (fs.existsSync(submissionCode)) {
           code = fs.readFileSync(submissionCode);
-          if(fs.existsSync(submissionStatusFile)) {
+          if (fs.existsSync(submissionStatusFile)) {
             submissionStatus = fs.readFileSync(submissionStatusFile);
             status = 200;
           } else {
@@ -515,6 +515,18 @@ router.put('/createContest', isAdmin, (req, res) => {
     }
   });
 });
+
+router.get('/contests', (req, res) => {
+  Contest.getAllContests((err, docs) => {
+    //TODO: Display all contests
+  })
+});
+
+router.get('/myContests', isAdmin, (req, res) => {
+  Contest.getMyContests(req.user.username, (err, docs) => {
+    //TODO: Display My contests
+  })
+})
 
 router.get('/contest/:contestId', (req, res) => {
   Contest.getContestDetails(req.params.contestId, (err, data) => {
