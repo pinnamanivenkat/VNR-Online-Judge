@@ -49,3 +49,12 @@ module.exports.getContestSubmissions = function (contestId, callback) {
     callback(err, data);
   });
 }
+
+module.exports.updateScore = function (submissionId, score) {
+  Submission.findById(submissionId,(err,docs) => {
+    if(!err && docs) {
+      docs.score = score;
+      docs.save();
+    }
+  })
+}

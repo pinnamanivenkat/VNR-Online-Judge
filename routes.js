@@ -353,7 +353,7 @@ router.post('/createProblem', (req, res) => {
     if (!issueCreating) {
       if (name == 'questionCode') {
         problemPath = path.join(problemPath, value);
-        questionPath = problemPath;         
+        questionPath = problemPath;
         if (fs.existsSync(problemPath)) {
           res.send({
             status: 400,
@@ -555,6 +555,29 @@ router.get('/contest/:contestId', (req, res) => {
   });
 });
 
+router.get('/mySubmissions/:contestId', (req, res) => {
+  Contest.getContestDetails(req.params.contestId, (err, data) => {
+    if (err || !data) {
+      res.sendStatus(404);
+    } else {
+      var contestStatus = getContestStatus(data.startdate, data.enddate);
+      if (contestStatus != "notstarted") {
+        Submission.getContestSubmissions(req.params.contestId, (err, data) => {
+          if (err || !data) {
+            res.sendStatus(404);
+          } else {
+            res.render('mySubmissions', {
+              data
+            });
+          }
+        });
+      } else {
+        res.sendStatus(404);
+      }
+    }
+  });
+});
+
 function getContestStatus(start, end) {
   const presentDate = new Date();
   const startdate = (new Date(start));
@@ -620,7 +643,7 @@ router.get('/contest/ranks/:contestId', (req, res) => {
   });
 });
 
-router.get('/runPlagiarizer/:contestId', isAdmin,(req, res) => {
+router.get('/runPlagiarizer/:contestId', isAdmin, (req, res) => {
   Submission.getContestSubmissions(req.params.contestId, (err, data) => {
     if (err || !data) {
       res.send({
@@ -630,7 +653,7 @@ router.get('/runPlagiarizer/:contestId', isAdmin,(req, res) => {
       var contestPlagiarism = path.join(plagiarismPath, req.params.contestId);
       data.forEach(submissionObject => {
         var newPath = path.join(contestPlagiarism, submissionObject.username + '_' + submissionObject._id);
-        if(!fs.existsSync(newPath)) {
+        if (!fs.existsSync(newPath)) {
           fsExtra.mkdirp(newPath);
         }
         var submissionPath = path.join(__dirname, 'submissions', '_' + submissionObject._id, '_' + submissionObject._id + '.' + submissionObject.language);
@@ -638,7 +661,7 @@ router.get('/runPlagiarizer/:contestId', isAdmin,(req, res) => {
       });
       var pc = childProcess.spawn('./moss -l cc ' + newPath + "/*");
       pc.stderr.on('data', (data) => {
-         
+
         pc.kill();
       });
       pc.stdout.on('data', (data) => {
@@ -649,8 +672,7 @@ router.get('/runPlagiarizer/:contestId', isAdmin,(req, res) => {
         });
         pc.kill();
       });
-      pc.on('close', (code, signal) => {
-      })
+      pc.on('close', (code, signal) => {})
     }
   });
 });

@@ -2,6 +2,7 @@ var bull = require('bull');
 var path = require('path');
 var fs = require('fs');
 var ContestScore = require('./models/contestScore');
+var Submission = require('./models/submission');
 const {
     c,
     cpp,
@@ -85,6 +86,7 @@ function executeCode(executor, data, done) {
             }
             if(testCase == files.length) {
                 fs.writeFileSync(path.join(data.submissionPath, "status.json"), JSON.stringify(executionResult));
+                Submission.updateScore(data.submissionId,score);
                 if(data.contestCode != 'practice') {
                     ContestScore.updateScore({
                         _id: data.contestCode,

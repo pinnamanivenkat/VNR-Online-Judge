@@ -9,11 +9,10 @@
         crossorigin="anonymous">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/"
         crossorigin="anonymous">
-    <link rel="stylesheet" href="css/myproblems.css">
+    <link rel="stylesheet" href="/css/question.css">
 </head>
-
 <body>
-        <nav class="navbar navbar-expand-sm container-fluid bg-dark navbar-dark fixed-top">
+    <nav class="navbar navbar-expand-sm container-fluid bg-dark navbar-dark fixed-top">
         <a class="navbar-brand" href="javascript:void(0)">Turing Hut</a>
 
         <ul class="nav navbar-nav ml-auto">
@@ -26,47 +25,48 @@
         </ul>
     </nav>
     <section>
-        <button id="createProblem">Create Problem</button>
         <div class="container">
             <table class="table table-bordered">
                 <thead>
                     <tr>
+                        <th>Submission Id</th>
                         <th>Problem Code</th>
-                        <th>Difficulty Level</th>
-                        <th>Delete</th>
-                        <!--<th>Edit</th>-->
+                        <th>Language</th>
+                        <th>Score</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <% for(var i=0;i<problems.length;i++) { %>
+                    <% for(var i=0;i<data.length;i++) { %>
                     <tr>
                         <td>
-                            <a href="problem/<%= problems[i]._id %>"><%= problems[i]._id %></a>
+                            <% if(data[i].contestCode == 'practice') { %>
+                                <a href="/viewSolution/<%= data[i]._id %>"><%= data[i]._id %></a>
+                            <% } else { %>
+                                <a href="/contest/<%= data[i].contestCode %>/viewSolution/<%= data[i]._id %>"><%= data[i]._id %></a>
+                            <% } %>
                         </td>
                         <td>
-                            <%= problems[i].difficultyLevel %>
+                            <%= data[i].problemCode %>
                         </td>
                         <td>
-                            <a href="javascript:void(0);" onclick="deleteProblem('<%= problems[i]._id %>')"><i class="fa fa-trash" aria-hidden="true"></i></a>
+                            <%= data[i].language %>
                         </td>
-                        <!--<td>
-                            <a><i class="far fa-edit" aria-hidden="true"></i></a>
-                        </td>-->
+                        <td>
+                            <%= data[i].score %>
+                        </td>
                     </tr>
                     <% }%>
                 </tbody>
             </table>
         </div>
     </section>
-
-
     <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
-        crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
-        crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
-        crossorigin="anonymous"></script>
-    <script src="js/myproblems.js"></script>
+    crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+    crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+    crossorigin="anonymous"></script>
+<script src="js/myproblems.js"></script>
 </body>
 
 </html>
