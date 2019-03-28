@@ -150,6 +150,14 @@ router.get('/myProblems', isAdmin, (req, res) => {
   });
 });
 
+router.get('/problems',(req,res)=> {
+  Problem.getAllProblems((docs)=> {
+    res.render('viewProblems',{
+      problems: docs
+    });
+  });
+});
+
 router.get('/question', isAdmin, (req, res) => {
   if (req.query.problemCode) {
     Problem.getProblemData(req.query.problemCode, (err, problemData) => {

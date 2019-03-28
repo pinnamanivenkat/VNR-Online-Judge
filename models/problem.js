@@ -62,3 +62,9 @@ module.exports.deleteProblem = function(problemCode,callback) {
     callback(err);
   })
 }
+
+module.exports.getAllProblems = function(callback) {
+  Problem.find({},(err,docs) => {
+    callback(docs);
+  });
+}
