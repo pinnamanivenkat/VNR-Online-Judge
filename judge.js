@@ -22,7 +22,7 @@ module.exports.execute = function (data) {
     queue.add(data);
 }
 
-queue.process((job, done) => {
+queue.process(5,(job, done) => {
     if (job.data.language == 'c') {
         executeCode(c, job.data, done);
     } else if (job.data.language == 'cpp') {

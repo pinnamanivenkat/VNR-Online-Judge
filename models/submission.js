@@ -17,6 +17,10 @@ const SubmissionSchema = mongoose.Schema({
     type: Number,
     required: true,
   },
+  submissionTime: {
+    type: Date,
+    required: true
+  },
   contestCode: {
     type: String,
   },
@@ -42,10 +46,13 @@ module.exports.getSubmissionDetails = function (submissionId, callback) {
   });
 }
 
-module.exports.getContestSubmissions = function (contestId, callback) {
+module.exports.getContestSubmissions = function (contestId,username, callback) {
   Submission.find({
+    username: username,
     contestCode: contestId
-  }, (err, data) => {
+  },null,{sort: {
+
+  }}, (err, data) => {
     callback(err, data);
   });
 }

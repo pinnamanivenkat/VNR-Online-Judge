@@ -41,15 +41,28 @@ module.exports.updateScore = function (userScore) {
                 res.userScore.push(dataObject);
                 res.save();
             } else {
+                var foundUser = false;
                 for(var i=0;i<res.userScore.length;i++) {
+                    console.log(res.userScore[i].username);
+                    console.log(userScore.username);
                     if(res.userScore[i].username == userScore.username) {
-                        if(res.userScore[i][userScore.problemCode]<userScore.score) {
+                        foundUser = true;
+                        console.log(res.userScore[i][userScore.problemCode]);
+                        if(res.userScore[i][userScore.problemCode]==undefined || res.userScore[i][userScore.problemCode]<userScore.score) {
                             res.userScore[i][userScore.problemCode] = userScore.score;
                             res.userScore[i].lastSubmission = userScore.submissionTime;
                             res.markModified("userScore");
                         }
                         break;
                     }
+                }
+                if(!foundUser) {
+                    var dataObject = {
+                        username: userScore.username
+                    };
+                    dataObject[userScore.problemCode] = userScore.score;
+                    dataObject.lastSubmission = userScore.submissionTime;
+                    res.userScore.push(dataObject);
                 }
                 res.save();
             }

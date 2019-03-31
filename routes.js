@@ -562,7 +562,7 @@ router.get('/mySubmissions/:contestId', (req, res) => {
     } else {
       var contestStatus = getContestStatus(data.startdate, data.enddate);
       if (contestStatus != "notstarted") {
-        Submission.getContestSubmissions(req.params.contestId, (err, data) => {
+        Submission.getContestSubmissions(req.params.contestId,req.user.username, (err, data) => {
           if (err || !data) {
             res.sendStatus(404);
           } else {
@@ -632,10 +632,23 @@ router.get('/contest/ranks/:contestId', (req, res) => {
         }
         userScores.push({
           username: element["username"],
-          score: userScore
+          score: userScore,
+          lastSubmission: element["lastSubmission"]
         });
       });
       userScores = sortByKey(userScores, 'score');
+      var tempArr = [],
+        tempUserScores = [];
+      for (var i = 0; i < userScores.length; i++) {
+        tempArr.push(userScores[i]);
+        if (!((i + 1) < userScores.length && userScores[i + 1].score == userScores[i].score)) {
+          sortByKey(tempArr, 'lastSubmission', true);
+        } else {
+          sortByKey(tempArr, 'lastSubmission', true);
+          tempUserScores.push(tempArr);
+          tempArr = [];
+        }
+      }
       res.render('ranks', {
         userScores
       })
@@ -713,16 +726,26 @@ function isLoggedIn(req, res, next) {
   });
 }
 
-function sortByKey(array, key) {
+function sortByKey(array, key, descending) {
   return array.sort(function (a, b) {
     var x = a[key];
     var y = b[key];
-    if (x < y) {
-      return 1;
-    } else if (x > y) {
-      return -1;
+    if (descending) {
+      if (x < y) {
+        return 1;
+      } else if (x > y) {
+        return -1;
+      } else {
+        return 0;
+      }
     } else {
-      return 0;
+      if (x > y) {
+        return 1;
+      } else if (x < y) {
+        return -1;
+      } else {
+        return 0;
+      }
     }
   });
 }
