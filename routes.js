@@ -376,7 +376,7 @@ router.post('/createProblem', (req, res) => {
       } else if (name == 'difficultyLevel') {
         problemConfig['difficultyLevel'] = value;
       } else if (name == 'visiblility') {
-        problemConfig['visible'] = (value == 'true');
+        problemConfig['visible'] = value;
       }
     }
   });
@@ -555,14 +555,14 @@ router.get('/contest/:contestId', (req, res) => {
   });
 });
 
-router.get('/mySubmissions/:contestId', (req, res) => {
+router.get('/mySubmissions/:contestId', isLoggedIn, (req, res) => {
   Contest.getContestDetails(req.params.contestId, (err, data) => {
     if (err || !data) {
       res.sendStatus(404);
     } else {
       var contestStatus = getContestStatus(data.startdate, data.enddate);
       if (contestStatus != "notstarted") {
-        Submission.getContestSubmissions(req.params.contestId,req.user.username, (err, data) => {
+        Submission.getContestSubmissions(req.params.contestId, req.user.username, (err, data) => {
           if (err || !data) {
             res.sendStatus(404);
           } else {
@@ -636,19 +636,18 @@ router.get('/contest/ranks/:contestId', (req, res) => {
           lastSubmission: element["lastSubmission"]
         });
       });
-      userScores = sortByKey(userScores, 'score');
+      userScores = sortByKey(userScores, 'score', true);
       var tempArr = [],
         tempUserScores = [];
       for (var i = 0; i < userScores.length; i++) {
         tempArr.push(userScores[i]);
-        if (!((i + 1) < userScores.length && userScores[i + 1].score == userScores[i].score)) {
-          sortByKey(tempArr, 'lastSubmission', true);
-        } else {
-          sortByKey(tempArr, 'lastSubmission', true);
-          tempUserScores.push(tempArr);
+        if (!((i + 1) < userScores.length && userScores[i + 1].score === userScores[i].score)) {
+          sortByKey(tempArr, 'lastSubmission', false);
+          tempUserScores.push(...tempArr);
           tempArr = [];
         }
       }
+      userScores = tempUserScores;
       res.render('ranks', {
         userScores
       })

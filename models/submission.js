@@ -51,7 +51,7 @@ module.exports.getContestSubmissions = function (contestId,username, callback) {
     username: username,
     contestCode: contestId
   },null,{sort: {
-
+    submissionTime: -1
   }}, (err, data) => {
     callback(err, data);
   });

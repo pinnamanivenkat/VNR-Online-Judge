@@ -31,6 +31,7 @@
                     <tr>
                         <th>Username</th>
                         <th>Score</th>
+                        <th>Time</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -41,6 +42,9 @@
                         </td>
                         <td>
                             <%= userScores[i].score %>
+                        </td>
+                        <td>
+                            <%= new Date(userScores[i].lastSubmission) %>
                         </td>
                     </tr>
                     <% }%>

@@ -59,7 +59,7 @@ function executeCode(executor, data, done) {
                 console.log(err);
             } else {
                 if (result.errorType) {
-                    if (result.errorType == 'compile-time') {
+                    if (result.errorType == 'compile-time' && result.exitCode) {
                         executionResult.status.push({
                             status: "CTE"
                         });
