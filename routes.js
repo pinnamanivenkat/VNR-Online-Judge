@@ -20,6 +20,7 @@ const Submission = require('./models/submission');
 const Contest = require('./models/contest');
 const ContestScore = require('./models/contestScore');
 const PlagiarismResults = require('./models/plagiarismResults');
+const FlexibleContests = require('./models/flexibleContest');
 
 var homeDir = os.homedir();
 var plagiarismPath = path.join(homeDir, '.plagiarism');
@@ -531,7 +532,7 @@ function getContestDetails(docs) {
   docs.forEach(doc => {
     doc.contestStatus = getContestStatus(doc.startdate, doc.enddate);
     if (doc.contesttype == 'fixedtime') {
-      doc.contestDuration = Math.abs(doc.startdate.getTime() - doc.enddate.getTime()) / 3600000 + ' hrs';
+      doc.contestDuration = Number((Math.abs(doc.startdate.getTime() - doc.enddate.getTime()) / 3600000).toFixed(2)) + ' hrs';
     } else {
       doc.contestDuration = doc.contestDuration + ' hrs';
     }
@@ -546,14 +547,22 @@ router.get('/contest/:contestId', (req, res) => {
       res.sendStatus(404);
     } else {
       const dataObject = JSON.parse(JSON.stringify(data));
-      dataObject['contestStatus'] = getContestStatus(data.startdate, data.enddate);
-      contestStatus[data._id] = dataObject['contestStatus'];
-      res.render('contest', {
-        dataObject,
-      });
+      if(data.contesttype == 'flexible') {
+        dataObject['contestStatus'] = getFlexibleContestStatus(req.params.contestId,req.user.username,data.startdate,data.enddate);
+      } else {
+        dataObject['contestStatus'] = getContestStatus(data.startdate, data.enddate);
+        contestStatus[data._id] = dataObject['contestStatus'];
+        res.render('contest', {
+          dataObject,
+        });
+      }
     }
   });
 });
+
+function getFlexibleContestStatus(contestCode,username,startdate,enddate) {
+  FlexibleContests.getUserContestDetails()
+}
 
 router.get('/mySubmissions/:contestId', isLoggedIn, (req, res) => {
   Contest.getContestDetails(req.params.contestId, (err, data) => {
