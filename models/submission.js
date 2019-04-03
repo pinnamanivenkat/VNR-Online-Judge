@@ -57,6 +57,15 @@ module.exports.getContestSubmissions = function (contestId,username, callback) {
   });
 }
 
+module.exports.getAllContestSubmissionsByLanguage = function (contestId,language, callback) {
+  Submission.find({
+    contestCode: contestId,
+    language: language
+  }, (err, data) => {
+    callback(err, data);
+  });
+}
+
 module.exports.updateScore = function (submissionId, score) {
   Submission.findById(submissionId,(err,docs) => {
     if(!err && docs) {

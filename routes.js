@@ -23,7 +23,10 @@ const PlagiarismResults = require('./models/plagiarismResults');
 const FlexibleContests = require('./models/flexibleContest');
 
 var homeDir = os.homedir();
-var plagiarismPath = path.join(homeDir, '.plagiarism');
+var plagiarismPath = path.join(homeDir, '.thplagiarism');
+if (!fs.existsSync(plagiarismPath)) {
+  fs.mkdirSync(plagiarismPath);
+}
 
 passport.use(new LocalStratey((username, password, done) => {
   User.getUserByUsername(username, function (err, user) {
@@ -199,7 +202,7 @@ router.post('/submit/:questionId', isLoggedIn, (req, res) => {
 });
 
 router.post('/submit/:contestId/:questionId', isLoggedIn, (req, res) => {
-  const temp = contestStatus[req.params.contestId+"___"+req.user.username];
+  const temp = contestStatus[req.params.contestId + "___" + req.user.username];
   var submissionTime = new Date();
   if (temp == 'running') {
     const submissionObject = {
@@ -542,7 +545,7 @@ function getContestDetails(docs) {
   return contests;
 }
 
-router.get('/contest/:contestId', (req, res) => {
+router.get('/contest/:contestId', isLoggedIn, (req, res) => {
   Contest.getContestDetails(req.params.contestId, (err, data) => {
     if (err || !data) {
       res.sendStatus(404);
@@ -554,7 +557,7 @@ router.get('/contest/:contestId', (req, res) => {
             dataObject['startdate'] = userStartDate;
             dataObject['enddate'] = userEndDate;
             dataObject['contestStatus'] = status;
-            contestStatus[data._id+"___"+req.user.username] = dataObject['contestStatus'];
+            contestStatus[data._id + "___" + req.user.username] = dataObject['contestStatus'];
             res.render('contest', {
               dataObject,
             });
@@ -564,7 +567,7 @@ router.get('/contest/:contestId', (req, res) => {
         }
       } else {
         dataObject['contestStatus'] = getContestStatus(data.startdate, data.enddate);
-        contestStatus[data._id+"___"+req.user.username] = dataObject['contestStatus'];
+        contestStatus[data._id + "___" + req.user.username] = dataObject['contestStatus'];
         res.render('contest', {
           dataObject,
         });
@@ -647,7 +650,7 @@ function getContestStatus(start, end) {
 }
 
 router.get('/contest/:contestId/problem/:questionId', (req, res) => {
-  if (contestStatus[req.params.contestId+"___"+req.user.username] != 'notstarted') {
+  if (contestStatus[req.params.contestId + "___" + req.user.username] != 'notstarted') {
     Problem.getProblemData(req.params.questionId, (err, problemData) => {
       if (err) {
         res.sendStatus(404);
@@ -710,33 +713,55 @@ router.get('/contest/ranks/:contestId', (req, res) => {
   });
 });
 
-router.get('/runPlagiarizer/:contestId', isAdmin, (req, res) => {
-  Submission.getContestSubmissions(req.params.contestId, (err, data) => {
+router.get('/myPlagiarismResults', isAdmin, (req, res) => {
+  PlagiarismResults.findMyPlagiarismResults(req.user.username, (err, docs) => {
+    if (!err && docs) {
+      res.render('myPlagiarismResults', {
+        docs
+      });
+    } else {
+      res.sendStatus(404);
+    }
+  })
+});
+
+router.get('/runPlagiarizer/:contestId/:language', isAdmin, (req, res) => {
+  Submission.getAllContestSubmissionsByLanguage(req.params.contestId, req.params.language, (err, data) => {
     if (err || !data) {
       res.send({
         status: 404
       });
     } else {
-      var contestPlagiarism = path.join(plagiarismPath, req.params.contestId);
+      var contestPlagiarism = path.join(plagiarismPath, req.params.contestId, req.params.language);
+      fsExtra.removeSync(contestPlagiarism);
+      if (!fs.existsSync(contestPlagiarism)) {
+        fsExtra.mkdirpSync(contestPlagiarism);
+        console.log('creating dir')
+      } else {
+        console.log(contestPlagiarism);
+      }
       data.forEach(submissionObject => {
         var newPath = path.join(contestPlagiarism, submissionObject.username + '_' + submissionObject._id);
-        if (!fs.existsSync(newPath)) {
-          fsExtra.mkdirp(newPath);
-        }
         var submissionPath = path.join(__dirname, 'submissions', '_' + submissionObject._id, '_' + submissionObject._id + '.' + submissionObject.language);
         fs.copyFileSync(submissionPath, newPath);
       });
-      var pc = childProcess.spawn('./moss -l cc ' + newPath + "/*");
+      var language = req.params.language;
+      if (language == 'cpp') {
+        language = "cc";
+      }
+      var pc = childProcess.exec('./moss -l ' + language + " " + contestPlagiarism + "/*");
       pc.stderr.on('data', (data) => {
-
         pc.kill();
       });
       pc.stdout.on('data', (data) => {
+        data = data.substring(0, data.length - 1);
         PlagiarismResults.insertPlagiarismResult({
           _id: req.params.contestId,
+          language: req.params.language,
           resultsUrl: data,
           username: req.user.username
         });
+        res.redirect(data);
         pc.kill();
       });
       pc.on('close', (code, signal) => {})

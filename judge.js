@@ -22,7 +22,7 @@ module.exports.execute = function (data) {
     queue.add(data);
 }
 
-queue.process(5,(job, done) => {
+queue.process((job, done) => {
     if (job.data.language == 'c') {
         executeCode(c, job.data, done);
     } else if (job.data.language == 'cpp') {
@@ -55,6 +55,7 @@ function executeCode(executor, data, done) {
             timeout: 1000
         }, (err, result) => {
             testCase++;
+            console.log(testCase+" "+files.length);
             if (err) {
                 console.log(err);
             } else {
