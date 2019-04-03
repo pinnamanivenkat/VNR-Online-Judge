@@ -75,8 +75,10 @@
         </div>
         <% } else if (dataObject.contestStatus=="ended") { %>
         <p>Ended</p>
-        <% } else { %>
+        <% } else if(dataObject.contestStatus=="notstarted") { %>
         <p>Contest Didn't started yet</p>
+        <% } else { %>
+            <button id="startContest"></button>
         <% } %>
     </div>
 
@@ -86,12 +88,12 @@
         var x = setInterval(function() {
             var now = new Date().getTime();
             <% if(dataObject.contestStatus == "running") { %>
-            let timeToEnd = enddate - now;
-            var days = Math.floor(timeToEnd / (1000 * 60 * 60 * 24));
-            var hours = Math.floor((timeToEnd % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            var minutes = Math.floor((timeToEnd % (1000 * 60 * 60)) / (1000 * 60));
-            var seconds = Math.floor((timeToEnd % (1000 * 60)) / 1000);
-            $("#running").html(days + "d " + hours + "h " + minutes + "m " + seconds + "s ");
+                let timeToEnd = enddate - now;
+                var days = Math.floor(timeToEnd / (1000 * 60 * 60 * 24));
+                var hours = Math.floor((timeToEnd % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                var minutes = Math.floor((timeToEnd % (1000 * 60 * 60)) / (1000 * 60));
+                var seconds = Math.floor((timeToEnd % (1000 * 60)) / 1000);
+                $("#running").html(days + "d " + hours + "h " + minutes + "m " + seconds + "s ");
             <% } else if(dataObject.contestStatus=="notstarted") { %>
 
             <% } %>
@@ -102,5 +104,6 @@
     <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script src="/js/contest.js"></script>
 
 </body>

@@ -534,7 +534,7 @@ function getContestDetails(docs) {
     if (doc.contesttype == 'fixedtime') {
       doc.contestDuration = Number((Math.abs(doc.startdate.getTime() - doc.enddate.getTime()) / 3600000).toFixed(2)) + ' hrs';
     } else {
-      doc.contestDuration = doc.contestDuration + ' hrs';
+      doc.contestDuration = doc.duration + ' hrs';
     }
     contests.push(doc);
   });
@@ -547,8 +547,8 @@ router.get('/contest/:contestId', (req, res) => {
       res.sendStatus(404);
     } else {
       const dataObject = JSON.parse(JSON.stringify(data));
-      if(data.contesttype == 'flexible') {
-        dataObject['contestStatus'] = getFlexibleContestStatus(req.params.contestId,req.user.username,data.startdate,data.enddate);
+      if(data.contesttype == 'flexibletime') {
+        dataObject['contestStatus'] = getFlexibleContestStatus(req.params.contestId,req.user.username,data.startdate,data.enddate,data.duration);
       } else {
         dataObject['contestStatus'] = getContestStatus(data.startdate, data.enddate);
         contestStatus[data._id] = dataObject['contestStatus'];
@@ -560,8 +560,30 @@ router.get('/contest/:contestId', (req, res) => {
   });
 });
 
-function getFlexibleContestStatus(contestCode,username,startdate,enddate) {
-  FlexibleContests.getUserContestDetails()
+function getFlexibleContestStatus(contestCode,username,start,end,duration) {
+  var presentDate = new Date();
+  var startdate = new Date(start);
+  var enddate = new Date(end);
+  if(presentDate>enddate) {
+    return 'ended';
+  } else if(presentDate<startdate) {
+    return 'notstarted';
+  } else {
+    FlexibleContests.getUserContestDetails(username,contestCode,(err,docs) => {
+      if(!err && docs) {
+        var userStartDate = new Date(docs.startdate);
+        var userEndDate = userStartDate;
+        userEndDate.setHours(userEndDate.getHours()+duration);
+        if(presentDate<userEndDate) {
+          return 'running'
+        } else {
+          return 'ended';
+        }
+      } else {
+        return 'usernotstarted';
+      }
+    })
+  }
 }
 
 router.get('/mySubmissions/:contestId', isLoggedIn, (req, res) => {
