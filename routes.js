@@ -199,7 +199,7 @@ router.post('/submit/:questionId', isLoggedIn, (req, res) => {
 });
 
 router.post('/submit/:contestId/:questionId', isLoggedIn, (req, res) => {
-  const temp = contestStatus[req.params.contestId];
+  const temp = contestStatus[req.params.contestId+"___"+req.user.username];
   var submissionTime = new Date();
   if (temp == 'running') {
     const submissionObject = {
@@ -500,7 +500,8 @@ router.put('/createContest', isAdmin, (req, res) => {
       ContestScore.createContest({
         _id: req.body.contestUrl,
         userScore: []
-      })
+      });
+      FlexibleContests.insertContestDetails(req.body.contestUrl);
       res.send({
         status: 200,
         message: 'Contest created, redirecting to contest page',
@@ -547,11 +548,23 @@ router.get('/contest/:contestId', (req, res) => {
       res.sendStatus(404);
     } else {
       const dataObject = JSON.parse(JSON.stringify(data));
-      if(data.contesttype == 'flexibletime') {
-        dataObject['contestStatus'] = getFlexibleContestStatus(req.params.contestId,req.user.username,data.startdate,data.enddate,data.duration);
+      if (data.contesttype == 'flexibletime') {
+        if (req.isAuthenticated()) {
+          getFlexibleContestStatus(req.params.contestId, req.user.username, data.startdate, data.enddate, data.duration, function (status, userStartDate, userEndDate) {
+            dataObject['startdate'] = userStartDate;
+            dataObject['enddate'] = userEndDate;
+            dataObject['contestStatus'] = status;
+            contestStatus[data._id+"___"+req.user.username] = dataObject['contestStatus'];
+            res.render('contest', {
+              dataObject,
+            });
+          });
+        } else {
+          res.redirect('/login');
+        }
       } else {
         dataObject['contestStatus'] = getContestStatus(data.startdate, data.enddate);
-        contestStatus[data._id] = dataObject['contestStatus'];
+        contestStatus[data._id+"___"+req.user.username] = dataObject['contestStatus'];
         res.render('contest', {
           dataObject,
         });
@@ -560,27 +573,38 @@ router.get('/contest/:contestId', (req, res) => {
   });
 });
 
-function getFlexibleContestStatus(contestCode,username,start,end,duration) {
+router.post('/startContest/:contestId', isLoggedIn, (req, res) => {
+  FlexibleContests.startContestForUser(req.user.username, req.params.contestId, (err, response) => {
+    if (!err && response) {
+      res.sendStatus(200);
+    } else {
+      res.sendStatus(404);
+    }
+  });
+});
+
+function getFlexibleContestStatus(contestCode, username, start, end, duration, callback) {
   var presentDate = new Date();
   var startdate = new Date(start);
   var enddate = new Date(end);
-  if(presentDate>enddate) {
-    return 'ended';
-  } else if(presentDate<startdate) {
-    return 'notstarted';
+  if (presentDate > enddate) {
+    callback('ended');
+  } else if (presentDate < startdate) {
+    callback('notstarted');
   } else {
-    FlexibleContests.getUserContestDetails(username,contestCode,(err,docs) => {
-      if(!err && docs) {
-        var userStartDate = new Date(docs.startdate);
+    FlexibleContests.getUserContestDetails(username, contestCode, (err, docs) => {
+      if (!err && docs) {
+        var userStartDate = new Date(docs);
         var userEndDate = userStartDate;
-        userEndDate.setHours(userEndDate.getHours()+duration);
-        if(presentDate<userEndDate) {
-          return 'running'
+        userEndDate.setHours(userEndDate.getHours() + duration);
+        if (presentDate < userEndDate) {
+          callback('running', userStartDate, userEndDate);
         } else {
-          return 'ended';
+          console.log('ended');
+          callback('ended');
         }
       } else {
-        return 'usernotstarted';
+        callback('usernotstarted');
       }
     })
   }
@@ -623,7 +647,7 @@ function getContestStatus(start, end) {
 }
 
 router.get('/contest/:contestId/problem/:questionId', (req, res) => {
-  if (contestStatus[req.params.contestId] != 'notstarted') {
+  if (contestStatus[req.params.contestId+"___"+req.user.username] != 'notstarted') {
     Problem.getProblemData(req.params.questionId, (err, problemData) => {
       if (err) {
         res.sendStatus(404);

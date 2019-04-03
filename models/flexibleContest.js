@@ -13,28 +13,38 @@ const FlexibleContestSchema = mongoose.Schema({
 
 const FlexibleContest = module.exports = mongoose.model('FlexibleContest', FlexibleContestSchema);
 
+module.exports.insertContestDetails = function(contestCode) {
+    FlexibleContest.create({
+        _id: contestCode,
+        contestSubmissionTime: {}
+    });
+}
+
+module.exports.startContestForUser = function(username,contestCode,callback) {
+    FlexibleContest.findById(contestCode,(err,docs)=>{
+        if(!err && docs) {
+            if(!docs.contestSubmissionTime) {
+                docs.contestSubmissionTime = {};
+            }
+            docs.contestSubmissionTime[username] = new Date();
+            callback(err,{});
+        } else {
+            callback(err,undefined);
+        }
+        docs.save();
+    });
+};
+
 module.exports.getUserContestDetails = function (username, contestCode, callback) {
     FlexibleContest.findById(contestCode, (err, docs) => {
         if (!err && docs) {
-            if (docs.contestSubmissionTime.username) {
-                // TODO: Send user start time
+            if (docs.contestSubmissionTime && docs.contestSubmissionTime[username]) {
+                callback(err,docs.contestSubmissionTime[username]);
             } else {
                 callback(err,undefined);
             }
         } else {
             callback(err, undefined);
         }
-        // var foundKey = false;
-        // for(var i=0;i<docs.contestSubmissionTime.length;i++) {
-        //     var element = docs.contestSubmissionTime[i];
-        //     if(element.username == username) {
-        //         foundKey = true;
-        //         callback(err,docs.contestSubmissionTime[i]);
-        //         break;
-        //     }
-        // }
-        // if(foundKey) {
-        //     callback(err,undefined)
-        // }
     });
 };
