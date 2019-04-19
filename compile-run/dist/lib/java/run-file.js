@@ -65,7 +65,7 @@ function runJavaFileAndReturnPromise(filePath, options) {
                 case 1:
                     classFilePath = _a.sent();
                     classPath = path_1.default.dirname(classFilePath);
-                    className = path_1.default.basename(classFilePath).split('.')[0];
+                    className = "TuringHut";
                     executionPath = options && options.executionPath || 'java';
                     return [4 /*yield*/, execute_command_1.execute(executionPath, ['-classpath', classPath, className], options)];
                 case 2:
