@@ -80,15 +80,13 @@ function executeCode(executor, data) {
             if(testCase == files.length) {
                 fs.writeFileSync(path.join(data.submissionPath, "status.json"), JSON.stringify(executionResult));
                 Submission.updateScore(data.submissionId,score);
-                if(data.contestCode != 'practice') {
-                    ContestScore.updateScore({
-                        _id: data.contestCode,
-                        username: data.username,
-                        problemCode: data.problemCode,
-                        score,
-                        submissionTime: data.submissionTime
-                    });
-                }
+                ContestScore.updateScore({
+                    _id: data.contestCode,
+                    username: data.username,
+                    problemCode: data.problemCode,
+                    score,
+                    submissionTime: data.submissionTime
+                });
             }
         });
     });

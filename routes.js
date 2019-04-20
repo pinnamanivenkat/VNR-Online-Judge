@@ -61,6 +61,11 @@ passport.deserializeUser(function (id, done) {
   });
 });
 
+ContestScore.createContest({
+  _id: "practice",
+  userScore: []
+});
+
 router.get('/', (req, res) => {
   res.render('index');
 });
@@ -612,6 +617,18 @@ function getFlexibleContestStatus(contestCode, username, start, end, duration, c
     })
   }
 }
+
+router.get('/submissions/practice',isLoggedIn,(req,res)=> {
+  Submission.getContestSubmissions('practice', req.user.username, (err, data) => {
+    if (err || !data) {
+      res.sendStatus(404);
+    } else {
+      res.render('mySubmissions', {
+        data
+      });
+    }
+  });
+});
 
 router.get('/mySubmissions/:contestId', isLoggedIn, (req, res) => {
   Contest.getContestDetails(req.params.contestId, (err, data) => {

@@ -30,7 +30,10 @@ $(() => {
         } else {
           alert('Please login to submit');
         }
-      },
+      },error: function(data) {
+        alert('Please login');
+        window.location = '/login';
+      }
     });
   });
 });

@@ -1,4 +1,5 @@
 var Queue = require('bull');
+var processor = require('./processor');
 
 const redisAuth = {
     host: "35.243.148.136",
@@ -15,4 +16,4 @@ module.exports.execute = function (data) {
     queue.add(data);
 }
 
-queue.process(5,'processor.js');
+queue.process(5,processor);

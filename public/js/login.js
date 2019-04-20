@@ -18,6 +18,8 @@ $(() => {
                     },
                     success: function (data) {
                         window.location = data.redirect;
+                    },error: function(data) {
+                        showFeedbackSnackBar("Wrong username/password");
                     }
                 });
             } else {
@@ -28,7 +30,6 @@ $(() => {
     });
 
     function showFeedbackSnackBar(x) {
-        console.log(snackBar);
         snackBar.text(x);
         snackBar.addClass("snackbar_show");
         setTimeout(function () {

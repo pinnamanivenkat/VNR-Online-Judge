@@ -29,7 +29,7 @@ module.exports.updateScore = function (userScore) {
     ContestScore.findOne({
         "_id": userScore._id
     }, (err, res) => {
-        if (err) {
+        if (err || !res) {
             console.log(err);
         } else {
             if(res.userScore.length==0) {
